@@ -4,6 +4,13 @@
 static void * free_list_address = (void *) 0x40000;
 static freeList * free_list;
 
+void initializeFreeList();
+page * createNewPage(uint64_t * page_address, size_t size, page * prev, uint64_t * data_address);
+page * getPage(size_t size);
+void splitPage(page * page, size_t usedSize);
+void joinPages(page * page);
+
+
 
 void initializeFreeList(){
   //inicializo la free_list
@@ -14,7 +21,7 @@ void initializeFreeList(){
   free_list->totalPages = 0;
 
   //creo una nueva pagina ubicada de forma contigua a la lista, y dejo lugar para todas las demas paginas, por eso apunto el data_address al "final" de toda la lista
-  page * newPage = createNewPage(free_list_address + sizeof(freeList), PAGE_SIZE, NULL, free_list_address + sizeof(freeList) + sizeof(page) * (MAX_PAGE_QUANTITY - 1);
+  struct page * newPage = createNewPage(free_list_address + sizeof(freeList), PAGE_SIZE, NULL, free_list_address + sizeof(freeList) + sizeof(page) * (MAX_PAGE_QUANTITY - 1));
 
 
 
@@ -27,7 +34,7 @@ page * createNewPage(uint64_t * page_address, size_t size, page * prev, uint64_t
     return NULL;
   }
 
-  page * newPage = (page *) page_address;
+  struct page * newPage = (page *) page_address;
 
   newPage->next = NULL;
   newPage->prev = prev;
@@ -55,7 +62,7 @@ page * createNewPage(uint64_t * page_address, size_t size, page * prev, uint64_t
 //dado un tamaño para almacenar, busca y devuelve la mejor opcion de pagina (first fit)
 page * getPage(size_t size){
 
-  page * currPage = free_list->head;
+  struct page * currPage = free_list->head;
   size_t allocSize = size;
   int freePages = free_list->freePages;
 
@@ -81,14 +88,14 @@ page * getPage(size_t size){
   if (free_list->tail->free) {
     currPage = free_list->tail;
   } else {
-    currPage = createNewPage(free_list->tail + sizeof(page), PAGE_SIZE, free_list->tail, free_list->last->data_address + free_list->size);
+    currPage = createNewPage(free_list->tail + sizeof(page), PAGE_SIZE, free_list->tail, free_list->tail->data_address + free_list->tail->size);
   }
 
   currPage->free = 0;
   allocSize -= currPage->size;
   (free_list->freePages)--;
   while (allocSize > 0) {
-    page * aux = createNewPage(free_list->tail + sizeof(page), PAGE_SIZE, free_list->tail, free_list->last->data_address + free_list->size);
+    struct page * aux = createNewPage(free_list->tail + sizeof(page), PAGE_SIZE, free_list->tail, free_list->tail->data_address + free_list->tail->size);
     if (aux == NULL){
       return NULL;
     }
@@ -109,7 +116,7 @@ void splitPage(page * page, size_t usedSize){
   if(page->size > usedSize){
 
     int freeSize = page->size - usedSize;
-    page * aux = page->next;
+    struct page * aux = page->next;
     page->next = createNewPage((uint64_t *)page + sizeof(page), freeSize, page, page->data_address + page->size);
     page->next->next = aux;
 
@@ -128,7 +135,7 @@ void splitPage(page * page, size_t usedSize){
 
 void joinPages(page * page){
   //uno las paginas vacias a partir de page
-  page * currPage = page->next;
+  struct page * currPage = page->next;
   while (currPage != NULL && currPage->free) {
     page->size += currPage->size;
     (free_list->freePages)--;
@@ -167,7 +174,7 @@ void joinPages(page * page){
 
 
 void free(void * data_address){
-  page * currPage = free_list->head;
+  struct page * currPage = free_list->head;
   while(currPage != NULL && currPage->data_address != data_address){
     currPage = currPage->next;
   }
@@ -181,10 +188,10 @@ void free(void * data_address){
 }
 
 void * malloc(size_t size){
-  if(free_list != (free_list *) free_list_address){
+  if(free_list != ((struct free_list *) free_list_address)){
     initializeFreeList();
   }
-  page * page = getPage(size);
+  struct page * page = getPage(size);
   splitPage(page, size);
   return page->data_address;
 }
