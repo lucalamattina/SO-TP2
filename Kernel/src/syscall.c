@@ -24,6 +24,8 @@ void handle_sys_clear_console(void);
 
 void handle_sys_draw_pixel(int x, int y, int r, int g, int b);
 
+void * handle_malloc(size_t size);
+
 //Handler de la llamada a la int 80
 uint64_t handleSyscall(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, uint64_t r8, uint64_t r9){
     switch(rdi){
@@ -56,6 +58,12 @@ uint64_t handleSyscall(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, u
 	        //del kernel. Se podria buscar una forma de apagar la PC
 	        //realmente, es decir, apagar el hardware.
             hang();
+        break;
+      case MALLOC:
+        handle_malloc(rsi);
+        break;
+      case FREE:
+        handle_free(rsi);
         break;
 	}
 	return 0;
@@ -109,4 +117,12 @@ void handle_sys_over_clock(int rate){
 //Recibe un selector que se utiliza para saber que registro acceder
 int handle_sys_time(uint64_t selector){
 	return get_time(selector);
+}
+
+void * handle_malloc(size_t size){
+  return malloc(size);
+}
+
+void handle_free(void * p){
+  return free(p);
 }

@@ -8,6 +8,7 @@
 #include <sound.h>
 #include <console.h>
 #include <videoDriver.h>
+#include <stddef.h>
 #include <types.h>
 #include <interrupts.h>
 
@@ -21,6 +22,8 @@
 #define CLEAR 8
 #define OVER_CLOCK 10
 #define SHUTDOWN 11
+#define MALLOC 12
+#define FREE 13
 
 uint64_t handleSyscall(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, uint64_t r8, uint64_t r9);
 
