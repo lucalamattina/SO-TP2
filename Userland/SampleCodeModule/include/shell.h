@@ -5,6 +5,7 @@
 #include <naiveConsole.h>
 #include <utils.h>
 #include <types.h>
+#include <stddef.h>
 
 #define MAX_BUFF_SIZE 750
 
@@ -32,5 +33,7 @@ void make_sound(void);
 void sleep(void);
 
 void display_invalid_command(void);
+
+void test_mm(void);
 
 #endif

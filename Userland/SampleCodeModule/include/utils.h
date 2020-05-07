@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdarg.h>
 #include <syscalls.h>
+#include <stddef.h>
 #include <naiveConsole.h>
 
 #define SECONDS 0
@@ -51,5 +52,9 @@ void print(const char * str);
 void printN(const char * str, int length);
 
 void clearScreen();
+
+void * malloc(size_t size);
+
+void free(void * p);
 
 #endif

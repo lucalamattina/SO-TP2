@@ -4,6 +4,7 @@
 //Incluye a interrupts para poder hacer la llamada a la int 80
 #include <interrupts.h>
 #include <stdint.h>
+#include <stddef.h>
 #include <utils.h>
 
 #define READ 1
@@ -16,6 +17,8 @@
 #define CLEAR 8
 #define OVER_CLOCK 10
 #define SHUTDOWN 11
+#define MALLOC 12
+#define FREE 13
 
 void sys_write(int fd, const char *buf, int count);
 
@@ -38,5 +41,9 @@ void sys_clear_console(void);
 int sys_time(int selector);
 
 void sys_shutdown();
+
+void * sys_malloc(size_t size);
+
+void sys_free(void * p);
 
 #endif

@@ -1,5 +1,5 @@
 #include <shell.h>
-
+#include "test_util.h"
 // ----------------------------------------------------------------------------------
 // Este modulo es el modulo principal de Userland
 // A partir de este modulo se pueden seleccionar otros modulos a traves de la terminal
@@ -20,10 +20,19 @@
 #define CREDITS_COMMAND 9
 #define STARWARS_COMMAND 10
 #define MARIO_COMMAND 11
+#define TEST_MM 12
+
+#define MAX_BLOCKS 128
+#define MAX_MEMORY 1024 //Should be around 80% of memory managed by the MM
+
+typedef struct MM_rq{
+  void * address;
+  uint32_t size;
+}mm_rq;
 
 //Todos los comandos disponibles
-const char *commands[] = {"help", "shutdown", "invalid", "time", "beep", "sleep", "date", "clear", "div", "credits", "starwars", "mario"};
-const int commandCount = 13;
+const char *commands[] = {"help", "shutdown", "invalid", "time", "beep", "sleep", "date", "clear", "div", "credits", "starwars", "mario", "testmm"};
+const int commandCount = 14;
 
 int getCommand(char *cmd);
 void generate_invalid_opc(void);
@@ -31,6 +40,49 @@ int generate_zero_division(void);
 void display_credits(void);
 void make_starwars(void);
 void make_mario(void);
+
+
+
+void test_mm(){
+  mm_rq mm_rqs[MAX_BLOCKS];
+  uint8_t rq;
+  uint32_t total;
+
+	while(1){
+    rq = 0;
+    total = 0;
+
+    // Request as many blocks as we can
+    while(rq < MAX_BLOCKS && total < MAX_MEMORY){
+      mm_rqs[rq].size = GetUniform(MAX_MEMORY - total - 1) + 1;
+      mm_rqs[rq].address = malloc(mm_rqs[rq].size); // TODO: Port this call as required
+
+      total += mm_rqs[rq].size;
+      rq++;
+    }
+
+    // Set
+    uint32_t i;
+    for (i = 0; i < rq; i++)
+      if (mm_rqs[i].address != NULL)
+        memset(mm_rqs[i].address, i, mm_rqs[i].size); // TODO: Port this call as required
+
+    // Check
+    for (i = 0; i < rq; i++)
+      if (mm_rqs[i].address != NULL)
+        if(!memcheck(mm_rqs[i].address, i, mm_rqs[i].size))
+          printf("ERROR!\n"); // TODO: Port this call as required
+
+    // Free
+    for (i = 0; i < rq; i++)
+      if (mm_rqs[i].address != NULL)
+        free(mm_rqs[i].address);  // TODO: Port this call as required
+  }
+}
+
+
+
+
 
 uint64_t *init_shell(void)
 {
@@ -175,6 +227,9 @@ void handle_command(int cmd)
 	case MARIO_COMMAND:
 		make_mario();
 		break;
+	case TEST_MM:
+		test_mm();
+		break;
 	}
 	print("\n");
 }
@@ -218,6 +273,7 @@ void display_help(void)
 	print("credits - Displays info about the group\n");
 	print("starwars - Makes a cool Star Wars sound!\n");
 	print("mario - Makes a cool Mario sound!\n");
+	print("testmm - Tests memory manager\n");
 }
 
 void display_time(void)
@@ -240,7 +296,7 @@ void display_credits(void)
 {
 	print("The authors of this OS are:\n");
 	print("Arquitectura de Computadoras:     Nacho Villanueva - Ignacio Ribas   - Gonzalo Hirsch\n");
-	print("Sistemas Operativos:              Nacho Villanueva - Luca La Mattina - Rodrigo Fera\n");
+	print("Sistemas Operativos:              Luca La Mattina - Rodrigo Fera\n");
 }
 
 void generate_invalid_opc()
@@ -529,6 +585,8 @@ void display_invalid_command(void)
 {
 	print("Invalid command, type \'help\' to view system commands\n");
 }
+
+
 
 void display_goodbye_message(void)
 {

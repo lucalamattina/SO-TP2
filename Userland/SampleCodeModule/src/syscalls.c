@@ -54,3 +54,11 @@ uint64_t sys_get_ticks(void){
 void sys_shutdown(){
     _int80(SHUTDOWN, 0, 0, 0, 0, 0);
 }
+
+void * sys_malloc(size_t size){
+	_int80((uint64_t)MALLOC,(uint64_t)size,0,0,0,0);
+}
+
+void sys_free(void * p){
+	_int80((uint64_t)FREE, (uint64_t)p,0,0,0,0);
+}

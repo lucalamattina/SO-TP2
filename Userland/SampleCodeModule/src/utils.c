@@ -365,3 +365,11 @@ void printN(const char * str, int length){
 void clearScreen(){
 	sys_clear_console();
 }
+
+void * malloc(size_t size){
+	return sys_malloc(size);
+}
+
+void free(void * p){
+	sys_free(p);
+}
