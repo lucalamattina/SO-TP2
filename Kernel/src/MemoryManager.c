@@ -109,7 +109,7 @@ page * getPage(size_t size){
 
 void splitPage(page * page, size_t usedSize){
   //no tengo mas espacio para agregar una page
-  if (free_list->totalPages == MAX_PAGE_QUANTITY) {
+  if (free_list->totalPages >= MAX_PAGE_QUANTITY) {
     return;
   }
 
@@ -117,7 +117,8 @@ void splitPage(page * page, size_t usedSize){
 
     int freeSize = page->size - usedSize;
     struct page * aux = page->next;
-    page->next = createNewPage((uint64_t *)page + sizeof(page), freeSize, page, page->data_address + page->size);
+    page->size = usedSize;
+    page->next = createNewPage((uint64_t *)page + sizeof(page), freeSize, page, page->data_address + usedSize + 1);
     page->next->next = aux;
 
     if(page == free_list->tail){
