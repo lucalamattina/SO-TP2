@@ -101,7 +101,7 @@ page * getPage(size_t size){
 
 void splitPage(page * page, size_t usedSize){
   //no tengo mas espacio para agregar una page
-  if (free_list->totalPages == MAX_PAGE_QUANTITY) {
+  if (free_list->totalPages >= MAX_PAGE_QUANTITY) {
     return;
   }
 
