@@ -60,7 +60,7 @@ uint64_t handleSyscall(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, u
             hang();
         break;
       case MALLOC:
-        handle_malloc(rsi);
+        return handle_malloc(rsi);
         break;
       case FREE:
         handle_free(rsi);

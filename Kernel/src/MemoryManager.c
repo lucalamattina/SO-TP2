@@ -87,22 +87,14 @@ page * getPage(size_t size){
   //la ultima pagina esta libre empiezo usando esa y veo si hace falta agregar mas
   if (free_list->tail->free) {
     currPage = free_list->tail;
+    currPage->size = size;
   } else {
-    currPage = createNewPage(free_list->tail + sizeof(page), PAGE_SIZE, free_list->tail, free_list->tail->data_address + free_list->tail->size);
+    currPage = createNewPage(free_list->tail + sizeof(page), size, free_list->tail, free_list->tail->data_address + free_list->tail->size);
   }
 
   currPage->free = 0;
-  allocSize -= currPage->size;
   (free_list->freePages)--;
-  while (allocSize > 0) {
-    struct page * aux = createNewPage(free_list->tail + sizeof(page), PAGE_SIZE, free_list->tail, free_list->tail->data_address + free_list->tail->size);
-    if (aux == NULL){
-      return NULL;
-    }
-    currPage->size += PAGE_SIZE;
-    allocSize -= PAGE_SIZE;
-  }
-  joinPages(currPage);
+
   return currPage;
 
 }
@@ -117,8 +109,13 @@ void splitPage(page * page, size_t usedSize){
 
     int freeSize = page->size - usedSize;
     struct page * aux = page->next;
-    page->next = createNewPage((uint64_t *)page + sizeof(page), freeSize, page, page->data_address + page->size);
+    page->next = createNewPage(free_list->tail + sizeof(page), freeSize, page, page->data_address + usedSize);
     page->next->next = aux;
+    page->size = usedSize;
+    if(aux != NULL){
+      aux->prev = page->next;
+    }
+
 
     if(page == free_list->tail){
 
@@ -131,16 +128,19 @@ void splitPage(page * page, size_t usedSize){
 
   }
 
+
 }
 
 void joinPages(page * page){
-  //uno las paginas vacias a partir de page
+  //uno las siguientes paginas vacias a partir de page
   struct page * currPage = page->next;
   while (currPage != NULL && currPage->free) {
     page->size += currPage->size;
     (free_list->freePages)--;
     (free_list->totalPages)--;
     currPage = currPage->next;
+    currPage->prev->next = NULL;
+    currPage->prev->prev = NULL;
   }
   //llegue a la ultima pagina
   if(currPage == NULL){
@@ -160,6 +160,8 @@ void joinPages(page * page){
     (free_list->totalPages)--;
     prevAddress = currPage->data_address;
     currPage = currPage->prev;
+    currPage->next->next = NULL;
+    currPage->next->prev = NULL;
   }
   //si no cambio esta direccion... me pisa memoria referenciada por otra page?
   page->data_address = prevAddress;

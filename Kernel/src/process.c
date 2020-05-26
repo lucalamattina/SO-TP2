@@ -1,35 +1,33 @@
 #include <process.h>
 
-static processList* processList;
-static void addProcessList(process * process);
+static void addProcess(process * process);
 static processNode * removeProcessList(processNode * node, process * process);
 
 void initList(void){
-	processList* processList = malloc(sizeof(processList));
-	processList->first = NULL;
-	processList->last = NULL;
-	processList->pidCount = 0;
+	pList = malloc(sizeof(pList));
+	pList->first = NULL;
+	pList->last = NULL;
+	pList->pidCount = 0;
 }
 
-process * newProcess(char * name, int argc, char** argv, int priority, int (*addressFunction) (int, char **)){
-	if(processList->pidCount >= MAX_PROCESSES){
+process * newProcess(char * name, int argc, char** argv, int priority, int isForeground , int (*entryPoint) (int, char **)){
+	if(pList->pidCount >= MAX_PROCESSES){
 		return NULL;
 	}
 	process * process = malloc(sizeof(process));
 	process->name = name;
-	process->pid = processList->pidCount++;
-	process->addressFunction = addressFunction;
-	process->priority = priority
+	process->pid = pList->pidCount++;
+	process->entryPoint = entryPoint;
+	process->priority = priority;
+	process->isForeground = isForeground;
 	process->state = READY;
 	process->argc = argc;
 	process->argv = argv;
 	process->fileDescriptors[0] = 0;
 	process->fileDescriptors[1] = 1;
-	for (int i = 2; i <MAX_FD; i++){
-		process->fileDescriptors[i] = -1;
-	}
 	process->stackBase = (uint64_t) malloc(PROCESS_SIZE) + PROCESS_SIZE -1;
-	process->stackPointer = process->stackBase - PROCESS_SIZE +1;
+	process->stackTop = process->stackBase - PROCESS_SIZE +1;
+	process->stackPointer = process->stackBase;
 	addProcess(process);
 	return process;
 }
@@ -37,13 +35,13 @@ process * newProcess(char * name, int argc, char** argv, int priority, int (*add
 static void addProcess(process * process){
 	processNode * aux = malloc(sizeof(processNode));
 	aux->process = process;
-	if(processList->first == NULL{
-		processList->first = aux;
+	if(pList->first == NULL){
+		pList->first = aux;
 		aux->next = NULL;
 		aux->prev = NULL;
 	}
 	else{
-		processNode* last = processList->first;
+		processNode* last = pList->first;
 		while(last->next != NULL){
 			last = last->next;
 		}
@@ -51,19 +49,20 @@ static void addProcess(process * process){
 	aux->next = NULL;
 	aux->prev = last;
 	}
-	processList->last = aux;
+	pList->last = aux;
 }
 
 
 void removeProcess(int pid){
-	processNode* aux = processList->first;
-	while(aux != NULL && aux->pid != pid){
+	if(pid != 0){
+	processNode* aux = pList->first;
+	while(aux != NULL && aux->process->pid != pid){
 		aux = aux->next;
 	}
 	if(aux == NULL){
 		return;
 	}
-	if(aux->pid == pid){
+	if(aux->process->pid == pid){
 			if(aux->prev == NULL){
 				aux->next->prev = NULL;
 			}
@@ -76,9 +75,67 @@ void removeProcess(int pid){
 			freeNode(aux);
 	}
 }
+}
+
+process * getProcess(int pid){
+	processNode * aux = pList->first;
+  while(aux!=NULL && aux->process->pid != pid){
+    aux = aux->next;
+  }
+	return aux->process;
+}
+
+void setState(int pid, processState state){
+  process * aux = getProcess(pid);
+  if(aux!=NULL && aux->pid == pid){
+    aux->state = state;
+  }
+}
 
 void freeNode(processNode * node){
-	free(node->process->stackPointer);
+	free(node->process->stackBase);
 	free(node->process);
 	free(node);
+	pList->pidCount--;
+}
+
+void ps(){
+	processNode * aux = pList->first;
+	while(aux!=NULL){
+		print("Process: %s \n", aux->process->name);
+		print("PID: %d \n", aux->process->pid);
+		switch(aux->process->state){
+			case READY: print("State: ");break;
+		}
+	}
+}
+
+void block(int pid){
+	process * aux = getProcess(pid);
+	if(aux != NULL){
+			if(aux->state == BLOCKED){
+				aux->state = READY;
+			}
+			else if(aux->state!= DEAD){
+				aux->state == BLOCKED;
+			}
+	}
+}
+
+void kill(int pid){
+	setState(pid, DEAD);
+	processNode * aux = pList->first;
+	while( aux != NULL && aux->process->pid != pid ){
+		aux = aux->next;
+	}
+	if(aux!=NULL){
+		freeNode(aux);
+	}
+}
+
+void nice(int pid, int priority){
+	process * aux = getProcess(pid);
+	if(aux != NULL){
+		aux->priority = priority;
+	}
 }

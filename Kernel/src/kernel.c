@@ -14,6 +14,9 @@
 #include <console.h>
 #include <pixelMap.h>
 #include <exceptions.h>
+#include <MemoryManager.h>
+#include <process.h>
+#include <scheduler.h>
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -67,16 +70,26 @@ void * initializeKernelBinary()
 
   initVideoDriver();
   init_console();
-
+	initializeFreeList(); //Initialize Memory Manager with Free list
+	initList(); //Initialize Process List
  	load_idt();
 	loadExceptions();
 
 	return getStackBase();
 }
 
-int main()
-{
-  goToUserland();
+void startShell(){
+	process* shell= newProcess("shell",0,NULL, 10, FOREGROUND, (uint64_t) sampleCodeModuleAddress);
+	setState(shell->pid, RUNNING);
+	initScheduler();
+	_runProcess(shell->stackPointer);
+}
+
+int main(){
+	process * init = newProcess("init",0,NULL, 10, BACKGROUND, (uint64_t) startShell);
+	setState(init->pid, RUNNING);
+	fakeStack(init);
+	_runProcess(init->stackPointer);
 	return 0;
 
 }
