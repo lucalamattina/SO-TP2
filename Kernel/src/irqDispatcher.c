@@ -25,7 +25,7 @@ void irqDispatcher(uint64_t irq, uint64_t stackPointer) {
 //Interrupcion para el timer tick
 void int_20(uint64_t stackPointer) {
     timer_handler();
-    scheduler(stackPointer);
+    //scheduler(stackPointer);
 }
 
 //Interrupcion para el teclado

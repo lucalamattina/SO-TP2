@@ -70,26 +70,28 @@ void * initializeKernelBinary()
 
   initVideoDriver();
   init_console();
-	initializeFreeList(); //Initialize Memory Manager with Free list
-	initList(); //Initialize Process List
+	//initializeFreeList(); //Initialize Memory Manager with Free list
+	//initList(); //Initialize Process List
+	//initScheduler();
  	load_idt();
 	loadExceptions();
 
 	return getStackBase();
 }
 
-void startShell(){
-	process* shell= newProcess("shell",0,NULL, 10, FOREGROUND, (uint64_t) sampleCodeModuleAddress);
-	setState(shell->pid, RUNNING);
-	initScheduler();
-	_runProcess(shell->stackPointer);
-}
+//void startShell(){
+//	process* shell= newProcess("shell",0,NULL, 10, FOREGROUND, (uint64_t) sampleCodeModuleAddress);
+//	setState(shell->pid, RUNNING);
+//	_runProcess(shell->stackPointer);
+//}
 
 int main(){
-	process * init = newProcess("init",0,NULL, 10, BACKGROUND, (uint64_t) startShell);
-	setState(init->pid, RUNNING);
-	fakeStack(init);
-	_runProcess(init->stackPointer);
+	goToUserland();
+	//initScheduler();
+	//process * init = newProcess("init",0,NULL, 10, BACKGROUND, (uint64_t) startShell);
+	//setState(init->pid, RUNNING);
+	//fakeStack(init);
+	//_runProcess(init->stackPointer);
 	return 0;
 
 }

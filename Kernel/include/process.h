@@ -4,6 +4,7 @@
 #include <lib.h>
 #include <stdlib.h>
 #include <stddef.h>
+#include <MemoryManager.h>
 
 #define PROCESS_SIZE 4096
 #define MAX_FD 2
@@ -43,6 +44,18 @@ typedef struct processList{
 	int pidCount;
 } processList;
 
-static processList * pList;
+processList * pList;
+
+void initList();
+process * newProcess(char * name, int argc, char** argv, int priority, int isForeground , int (*entryPoint) (int, char **));
+void addProcess(process * process);
+void removeProcess(int pid);
+process * getProcess(int pid);
+void setState(int pid, processState state);
+void freeNode(processNode * node);
+void ps();
+void block(int pid);
+void kill(int pid);
+void nice(int pid, int priority);
 
 #endif

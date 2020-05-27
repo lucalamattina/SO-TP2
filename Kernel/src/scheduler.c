@@ -1,7 +1,7 @@
 #include "scheduler.h"
 
 static int quantum;
-static processNode * current;
+processNode * current;
 
 
 
@@ -9,9 +9,9 @@ void initScheduler(){
   quantum = 2;
   current = NULL;
   //initList();
-  //process * shell = newProcess("shell",0,NULL, 10 ,FOREGROUND, entryPoint);
-  fakeStack(pList->first->next->process); //fake shell´s stack
-  current->process = pList->first->next->process;
+  process * shell = newProcess("shell",0,NULL, 10 ,FOREGROUND, (void*)0x400000);
+  fakeStack(shell); //fake shell´s stack
+  current->process = shell;
   setState(current->process->pid, RUNNING);
   _runProcess(current->process->stackPointer);
 }

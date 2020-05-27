@@ -24,7 +24,7 @@ void handle_sys_clear_console(void);
 
 void handle_sys_draw_pixel(int x, int y, int r, int g, int b);
 
-void * handle_malloc(size_t size);
+void * handle_pmalloc(size_t size);
 
 //Handler de la llamada a la int 80
 uint64_t handleSyscall(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, uint64_t r8, uint64_t r9){
@@ -60,10 +60,10 @@ uint64_t handleSyscall(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, u
             hang();
         break;
       case MALLOC:
-        return handle_malloc(rsi);
+        return handle_pmalloc(rsi);
         break;
       case FREE:
-        handle_free(rsi);
+        handle_pfree(rsi);
         break;
 	}
 	return 0;
@@ -119,10 +119,10 @@ int handle_sys_time(uint64_t selector){
 	return get_time(selector);
 }
 
-void * handle_malloc(size_t size){
-  return malloc(size);
+void * handle_pmalloc(size_t size){
+  return pmalloc(size);
 }
 
-void handle_free(void * p){
-  return free(p);
+void handle_pfree(void * p){
+  return pfree(p);
 }

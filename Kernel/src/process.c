@@ -1,10 +1,11 @@
 #include <process.h>
 
-static void addProcess(process * process);
-static processNode * removeProcessList(processNode * node, process * process);
+processList * pList; //agregamos esto en el .h y .c creo que es lo que falla
+void addProcess(process * process);
+struct processNode * removeProcessList(processNode * node, process * process);
 
 void initList(void){
-	pList = malloc(sizeof(pList));
+	pList = pmalloc(sizeof(pList));
 	pList->first = NULL;
 	pList->last = NULL;
 	pList->pidCount = 0;
@@ -14,7 +15,7 @@ process * newProcess(char * name, int argc, char** argv, int priority, int isFor
 	if(pList->pidCount >= MAX_PROCESSES){
 		return NULL;
 	}
-	process * process = malloc(sizeof(process));
+	process * process = pmalloc(sizeof(process));
 	process->name = name;
 	process->pid = pList->pidCount++;
 	process->entryPoint = entryPoint;
@@ -25,15 +26,15 @@ process * newProcess(char * name, int argc, char** argv, int priority, int isFor
 	process->argv = argv;
 	process->fileDescriptors[0] = 0;
 	process->fileDescriptors[1] = 1;
-	process->stackBase = (uint64_t) malloc(PROCESS_SIZE) + PROCESS_SIZE -1;
+	process->stackBase = (uint64_t) pmalloc(PROCESS_SIZE) + PROCESS_SIZE -1;
 	process->stackTop = process->stackBase - PROCESS_SIZE +1;
 	process->stackPointer = process->stackBase;
 	addProcess(process);
 	return process;
 }
 
-static void addProcess(process * process){
-	processNode * aux = malloc(sizeof(processNode));
+void addProcess(process * process){
+	processNode * aux = pmalloc(sizeof(processNode));
 	aux->process = process;
 	if(pList->first == NULL){
 		pList->first = aux;
@@ -61,8 +62,7 @@ void removeProcess(int pid){
 	}
 	if(aux == NULL){
 		return;
-	}
-	if(aux->process->pid == pid){
+	} else if(aux->process->pid == pid){
 			if(aux->prev == NULL){
 				aux->next->prev = NULL;
 			}
@@ -93,9 +93,9 @@ void setState(int pid, processState state){
 }
 
 void freeNode(processNode * node){
-	free(node->process->stackBase);
-	free(node->process);
-	free(node);
+	pfree(node->process->stackBase);
+	pfree(node->process);
+	pfree(node);
 	pList->pidCount--;
 }
 

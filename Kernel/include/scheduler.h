@@ -2,7 +2,7 @@
 #define SCHEDULER_H
 #include <stddef.h>
 #include <stdint.h>
-#include "process.h"
+#include <process.h>
 
 void _runProcess(uint64_t rsp);
 void fakeStack(process * process);
