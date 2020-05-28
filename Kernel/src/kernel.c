@@ -70,8 +70,8 @@ void * initializeKernelBinary()
 
   initVideoDriver();
   init_console();
-	//initializeFreeList(); //Initialize Memory Manager with Free list
-	//initList(); //Initialize Process List
+	initializeFreeList(); //Initialize Memory Manager with Free list
+	initList(); //Initialize Process List
 	//initScheduler();
  	load_idt();
 	loadExceptions();
@@ -86,8 +86,8 @@ void * initializeKernelBinary()
 //}
 
 int main(){
-	goToUserland();
-	//initScheduler();
+	// goToUserland();
+	initScheduler();
 	//process * init = newProcess("init",0,NULL, 10, BACKGROUND, (uint64_t) startShell);
 	//setState(init->pid, RUNNING);
 	//fakeStack(init);
