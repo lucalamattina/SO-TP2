@@ -56,7 +56,7 @@ void sys_shutdown(){
 }
 
 void * sys_malloc(size_t size){
-	_int80((uint64_t)MALLOC,(uint64_t)size,0,0,0,0);
+	return (void *)_int80((uint64_t)MALLOC,(uint64_t)size,0,0,0,0);
 }
 
 void sys_free(void * p){

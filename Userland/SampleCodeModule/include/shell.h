@@ -6,6 +6,7 @@
 #include <utils.h>
 #include <types.h>
 #include <stddef.h>
+#include <syscalls.h>
 
 #define MAX_BUFF_SIZE 750
 

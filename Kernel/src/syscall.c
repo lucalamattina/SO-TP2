@@ -120,9 +120,9 @@ int handle_sys_time(uint64_t selector){
 }
 
 void * handle_malloc(size_t size){
-  return malloc(size);
+  return pmalloc(size);
 }
 
 void handle_free(void * p){
-  return free(p);
+  return pfree(p);
 }

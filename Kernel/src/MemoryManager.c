@@ -1,7 +1,7 @@
 #include "MemoryManager.h"
 
 
-static void * free_list_address = (void *) 0x40000;
+static void * free_list_address = (void *) 0x700000;
 static freeList * free_list;
 
 void initializeFreeList();
@@ -175,7 +175,7 @@ void joinPages(page * page){
 }
 
 
-void free(void * data_address){
+void pfree(void * data_address){
   struct page * currPage = free_list->head;
   while(currPage != NULL && currPage->data_address != data_address){
     currPage = currPage->next;
@@ -189,7 +189,7 @@ void free(void * data_address){
 
 }
 
-void * malloc(size_t size){
+void * pmalloc(size_t size){
   if(free_list != ((struct free_list *) free_list_address)){
     initializeFreeList();
   }

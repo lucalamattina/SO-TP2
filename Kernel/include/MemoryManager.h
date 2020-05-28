@@ -9,8 +9,8 @@
 #define PAGE_SIZE 4096 //4Kb size pages
 #define MAX_PAGE_QUANTITY 32768 //1 Gb divided into 4Kb pages
 
-void * malloc(size_t space);
-void free(void * address);
+void * pmalloc(size_t space);
+void pfree(void * address);
 
 typedef struct page{
   struct page * next;

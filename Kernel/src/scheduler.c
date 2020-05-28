@@ -9,11 +9,11 @@ void initScheduler(){
   quantum = 2;
   current = NULL;
   //initList();
-  //process * shell = newProcess("shell",0,NULL, 10 ,FOREGROUND, entryPoint);
-  fakeStack(pList->first->next->process); //fake shell´s stack
-  current->process = pList->first->next->process;
-  setState(current->process->pid, RUNNING);
-  _runProcess(current->process->stackPointer);
+  // process * shell = newProcess("shell",0,NULL, 10 ,FOREGROUND, entryPoint);
+  // fakeStack(current->process); //fake shell´s stack
+  // current->process = pList->first->next->process;
+  // setState(current->process->pid, RUNNING);
+  // _runProcess(current->process->stackPointer);
 }
 
 
