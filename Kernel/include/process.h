@@ -44,7 +44,7 @@ typedef struct processList{
 	int pidCount;
 } processList;
 
-processList * pList;
+extern processList * pList;
 
 void initList();
 process * newProcess(char * name, int argc, char** argv, int priority, int isForeground , int (*entryPoint) (int, char **));
