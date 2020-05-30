@@ -30,6 +30,7 @@ static const uint64_t PageSize = 0x1000;
 //Addresses a donde copia los modulos
 static void * const sampleCodeModuleAddress = (void*)0x400000;
 static void * const sampleDataModuleAddress = (void*)0x500000;
+static uint64_t * const free_list_address = (uint64_t *) 0x1000000;
 
 typedef int (*EntryPoint)();
 
@@ -70,9 +71,9 @@ void * initializeKernelBinary()
 
   initVideoDriver();
   init_console();
-	initializeFreeList(); //Initialize Memory Manager with Free list
+	initializeFreeList(free_list_address); //Initialize Memory Manager with Free list
 	initList(); //Initialize Process List
-	//initScheduler();
+	initScheduler();
  	load_idt();
 	loadExceptions();
 
@@ -87,11 +88,11 @@ void * initializeKernelBinary()
 
 int main(){
 	// goToUserland();
-	initScheduler();
+
 	//process * init = newProcess("init",0,NULL, 10, BACKGROUND, (uint64_t) startShell);
 	//setState(init->pid, RUNNING);
 	//fakeStack(init);
 	//_runProcess(init->stackPointer);
-	return 0;
+	return 1;
 
 }

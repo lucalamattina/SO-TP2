@@ -26,6 +26,8 @@ void handle_sys_draw_pixel(int x, int y, int r, int g, int b);
 
 void * handle_pmalloc(size_t size);
 
+void handle_pfree(void * p);
+
 //Handler de la llamada a la int 80
 uint64_t handleSyscall(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, uint64_t r8, uint64_t r9){
     switch(rdi){
@@ -60,7 +62,7 @@ uint64_t handleSyscall(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, u
             hang();
         break;
       case MALLOC:
-        return handle_pmalloc(rsi);
+        return (uint64_t)handle_pmalloc(rsi);
         break;
       case FREE:
         handle_pfree(rsi);
@@ -124,5 +126,5 @@ void * handle_pmalloc(size_t size){
 }
 
 void handle_pfree(void * p){
-  return pfree(p);
+  pfree(p);
 }
