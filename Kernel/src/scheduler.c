@@ -9,9 +9,9 @@ void initScheduler(){
   quantum = 2;
   current = NULL;
   //initList();
-  process * shell = newProcess("shell",0,NULL, 10 ,FOREGROUND, (void*)0x400000);
+  process * shell = newProcess("shell",0,NULL, 10, (void*)0x400000);
   fakeStack(shell); //fake shell´s stack
-  current->process = shell;
+  current = pList->first;
   setState(current->process->pid, RUNNING);
   _runProcess(current->process->stackPointer);
 }
@@ -26,14 +26,21 @@ void scheduler(uint64_t stackPointer){
     }
     setState(current->process->pid, READY);
   }
-  do {
-    if(current->next == NULL){
-      current = pList->first;
-    }
-    else{
-      current = current->next;
-    }
-  } while(current->process->state != READY);
+  while(current->process->state != READY){
+      if (current->next == NULL) {
+        current = pList->first;
+      }else{
+        current = current->next;
+      }
+  }
+  // do {
+  //   if(current->next == NULL){
+  //     current = pList->first;
+  //   }
+  //   else{
+  //     current = current->next;
+  //   }
+  // } while(current->process->state != READY);
   setState(current->process->pid, RUNNING);
   quantum = current->process->priority;
   _runProcess(current->process->stackPointer);

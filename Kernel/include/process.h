@@ -30,7 +30,7 @@ typedef struct process{
 	long int pid;
 	enum processState state;
 	int priority;
-	int isForeground;
+	// int isForeground;
 	int fileDescriptors[MAX_FD];
 	uint64_t stackBase;
 	uint64_t stackTop;
@@ -47,7 +47,7 @@ typedef struct processList{
 extern processList * pList;
 
 void initList();
-process * newProcess(char * name, int argc, char** argv, int priority, int isForeground , int (*entryPoint) (int, char **));
+process * newProcess(char * name, int argc, char** argv, int priority, int (*entryPoint) (int, char **));
 void addProcess(process * process);
 void removeProcess(int pid);
 process * getProcess(int pid);

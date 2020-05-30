@@ -11,7 +11,7 @@ void initList(void){
 	pList->pidCount = 0;
 }
 
-process * newProcess(char * name, int argc, char** argv, int priority, int isForeground , int (*entryPoint) (int, char **)){
+process * newProcess(char * name, int argc, char** argv, int priority, int (*entryPoint) (int, char **)){
 	if(pList->pidCount >= MAX_PROCESSES){
 		return NULL;
 	}
@@ -20,7 +20,7 @@ process * newProcess(char * name, int argc, char** argv, int priority, int isFor
 	process->pid = pList->pidCount++;
 	process->entryPoint = entryPoint;
 	process->priority = priority;
-	process->isForeground = isForeground;
+	// process->isForeground = isForeground;
 	process->state = READY;
 	process->argc = argc;
 	process->argv = argv;
@@ -93,9 +93,9 @@ void setState(int pid, processState state){
 }
 
 void freeNode(processNode * node){
-	pfree(node->process->stackBase);
-	pfree(node->process);
-	pfree(node);
+	pfree((void *)node->process->stackBase);
+	pfree((void *)node->process);
+	pfree((void *)node);
 	pList->pidCount--;
 }
 

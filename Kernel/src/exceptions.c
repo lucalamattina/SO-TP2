@@ -43,8 +43,6 @@ void loadExceptions(){
 //como parametro el numero de excepcion para mapear al mensaje de interrupcion correspondiente
 void exceptionDispatcher(uint64_t type){
 
-
-
         _cli();
 
     if (type < 8 || type == 9 || type == 15 || type == 16 || (type > 17 && type < 30) || type > 30) {

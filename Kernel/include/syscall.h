@@ -11,6 +11,7 @@
 #include <stddef.h>
 #include <types.h>
 #include <interrupts.h>
+#include <MemoryManager.h>
 
 #define READ 1
 #define WRITE 2
