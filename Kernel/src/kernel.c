@@ -70,19 +70,19 @@ void * initializeKernelBinary()
 
 	clearBSS(&bss, &endOfKernel - &bss);
 
-	print("Starting video driver\n");
+	// print("Starting video driver\n");
   initVideoDriver();
-	print("Starting console\n");
+	// print("Starting console\n");
   init_console();
-	print("Starting memory manager\n");
-	initializeFreeList(free_list_address); //Initialize Memory Manager with Free list
-	print("Starting processes\n");
-	initList(); //Initialize Process List
-	print("Starting scheduler\n");
-	initScheduler();
-	print("Loading IDT\n");
+	// print("Starting memory manager\n");
+	 //Initialize Memory Manager with Free list
+	// print("Starting processes\n");
+	 //Initialize Process List
+	// print("Starting scheduler\n");
+
+	// print("Loading IDT\n");
  	load_idt();
-	print("Loading exceptions\n");
+	// print("Loading exceptions\n");
 	loadExceptions();
 
 	return getStackBase();
@@ -96,7 +96,9 @@ void * initializeKernelBinary()
 
 int main(){
 	// goToUserland();
-
+	initializeFreeList(free_list_address);
+	initList();
+	initScheduler();
 	//process * init = newProcess("init",0,NULL, 10, BACKGROUND, (uint64_t) startShell);
 	//setState(init->pid, RUNNING);
 	//fakeStack(init);

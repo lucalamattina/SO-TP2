@@ -8,6 +8,8 @@ _runProcess:
 
 	mov rsp, rdi
 
+	pop gs
+	pop fs
 	pop r15
 	pop r14
 	pop r13
@@ -22,12 +24,13 @@ _runProcess:
 	pop rdx
 	pop rcx
 	pop rbx
+	pop rax
 
 	; End Of Interrupt
 	mov al, 20h
 	out 20h, al
 
-	pop rax
+
 	iretq
 
 _fakeStack:
@@ -61,6 +64,8 @@ _fakeStack:
 	push 13  ; r13
 	push 14  ; r14
 	push 15  ; r15
+	push fs
+	push gs
 
 	mov rax, rsp
 

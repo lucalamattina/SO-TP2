@@ -58,9 +58,9 @@ void initializeFreeList(uint64_t * free_list_address){
   page * newPage = createNewPage(free_list_address + sizeof(freeList), PAGE_SIZE, NULL, free_list_address + sizeof(freeList) + sizeof(page) * MAX_PAGE_QUANTITY);
   // page * newPage2 = createNewPage((uint64_t *)(free_list->tail + sizeof(page)), 4080, free_list->tail, (uint64_t *)(free_list->tail->data_address + free_list->tail->size));
   // page * newPage3 = createNewPage((uint64_t *)(free_list->tail + sizeof(page)), 4096, free_list->tail, (uint64_t *)(free_list->tail->data_address + free_list->tail->size));
-  print("----------initMM--------\n");
-  printInteger(newPage);
-  print("\n");
+  // print("----------initMM--------\n");
+  // printInteger(newPage);
+  // print("\n");
   // printInteger(newPage2);
   // print("\n");
   // printInteger(newPage3);
@@ -134,10 +134,10 @@ void splitPage(page * p, size_t usedSize){
     p->next->next = auxPage;
 
     if(auxPage != NULL){
-      printInteger(auxPage);
-      print("\n");
-      printInteger(auxPage->prev);
-      print("\n");
+      // printInteger(auxPage);
+      // print("\n");
+      // printInteger(auxPage->prev);
+      // print("\n");
       auxPage->prev = p->next;
     }
 
@@ -214,17 +214,17 @@ void pfree(void * dataAddress){
 
 void * pmalloc(size_t size){
   page * returnPage = getPage(size);
-  print("--------getPage------\n");
-  printInteger(returnPage);
-  print("\n");
-  printInteger(size);
-  print("\n");
-  splitPage(returnPage, size);
-  print("--------splitPage-------\n");
-  printInteger(returnPage);
-  print("\n");
-  printInteger(size);
-  print("\n");
+  // print("--------getPage------\n");
+  // printInteger(returnPage);
+  // print("\n");
+  // printInteger(size);
+  // print("\n");
+  // splitPage(returnPage, size);
+  // print("--------splitPage-------\n");
+  // printInteger(returnPage);
+  // print("\n");
+  // printInteger(size);
+  // print("\n");
 
   return returnPage->data_address;
 }
