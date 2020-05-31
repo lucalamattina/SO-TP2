@@ -39,13 +39,12 @@ page * createNewPage(uint64_t * page_address, size_t allocSize, page * prev, uin
 void createPageInTail(){
   if(free_list->totalPages == MAX_PAGE_QUANTITY)
         {
-            //there is no more space
             return;
         }
-    (free_list->totalPages)++;
-    (free_list->freePages)++;
     free_list->tail->next = createNewPage((uint64_t *) (free_list->tail) + sizeof(page), PAGE_SIZE, free_list->tail, free_list->tail->data_address + free_list->tail->size);
     free_list->tail = free_list->tail->next;
+    (free_list->totalPages)++;
+    (free_list->freePages)++;
 }
 
 void initializeFreeList(uint64_t * free_list_address){
