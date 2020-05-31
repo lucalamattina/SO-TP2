@@ -18,6 +18,7 @@
 #include <process.h>
 #include <scheduler.h>
 
+
 extern uint8_t text;
 extern uint8_t rodata;
 extern uint8_t data;
@@ -69,12 +70,19 @@ void * initializeKernelBinary()
 
 	clearBSS(&bss, &endOfKernel - &bss);
 
+	print("Starting video driver\n");
   initVideoDriver();
+	print("Starting console\n");
   init_console();
+	print("Starting memory manager\n");
 	initializeFreeList(free_list_address); //Initialize Memory Manager with Free list
+	print("Starting processes\n");
 	initList(); //Initialize Process List
+	print("Starting scheduler\n");
 	initScheduler();
+	print("Loading IDT\n");
  	load_idt();
+	print("Loading exceptions\n");
 	loadExceptions();
 
 	return getStackBase();

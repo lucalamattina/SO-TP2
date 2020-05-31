@@ -4,19 +4,6 @@
 freeList * free_list;
 
 
-void initializeFreeList(uint64_t * free_list_address){
-  //inicializo la free_list
-  free_list = (freeList *) free_list_address;
-  free_list->head = NULL;
-  free_list->tail = NULL;
-  free_list->freePages = 0;
-  free_list->totalPages = 0;
-
-  //creo una nueva pagina ubicada de forma contigua a la lista, y dejo lugar para todas las demas paginas, por eso apunto el data_address al "final" de toda la lista
-  page * newPage = createNewPage(free_list_address + sizeof(freeList), PAGE_SIZE, NULL, free_list_address + sizeof(freeList) + sizeof(page) * MAX_PAGE_QUANTITY);
-
-}
-
 //crea una pagina nueva ubicada en page_address de tamaño size que maneja los datos de data_address. Tambien agrega la nueva page al final de la free_list
 page * createNewPage(uint64_t * page_address, size_t allocSize, page * prev, uint64_t * dataAddress){
   //no hay espacio para crear una pagina nueva
@@ -36,16 +23,48 @@ page * createNewPage(uint64_t * page_address, size_t allocSize, page * prev, uin
   if (free_list->head == NULL && free_list->tail == NULL) {
     free_list->head = newPage;
     free_list->tail = newPage;
-  } else {
-    free_list->tail->next = newPage;
-    free_list->tail = newPage;
   }
+  //else {
+  //   free_list->tail->next = newPage;
+  //   free_list->tail = newPage;
+  // }
 
-  (free_list->freePages)++;
-  (free_list->totalPages)++;
+  // (free_list->freePages)++;
+  // (free_list->totalPages)++;
 
   return newPage;
 
+}
+
+void createPageInTail(){
+  if(free_list->totalPages == MAX_PAGE_QUANTITY)
+        {
+            return;
+        }
+    free_list->tail->next = createNewPage((uint64_t *) (free_list->tail) + sizeof(page), PAGE_SIZE, free_list->tail, free_list->tail->data_address + free_list->tail->size);
+    free_list->tail = free_list->tail->next;
+    (free_list->totalPages)++;
+    (free_list->freePages)++;
+}
+
+void initializeFreeList(uint64_t * free_list_address){
+  //inicializo la free_list
+  free_list = (freeList *) free_list_address;
+  free_list->head = NULL;
+  free_list->tail = NULL;
+  free_list->freePages = 1;
+  free_list->totalPages = 1;
+  //creo una nueva pagina ubicada de forma contigua a la lista, y dejo lugar para todas las demas paginas, por eso apunto el data_address al "final" de toda la lista
+  page * newPage = createNewPage(free_list_address + sizeof(freeList), PAGE_SIZE, NULL, free_list_address + sizeof(freeList) + sizeof(page) * MAX_PAGE_QUANTITY);
+  // page * newPage2 = createNewPage((uint64_t *)(free_list->tail + sizeof(page)), 4080, free_list->tail, (uint64_t *)(free_list->tail->data_address + free_list->tail->size));
+  // page * newPage3 = createNewPage((uint64_t *)(free_list->tail + sizeof(page)), 4096, free_list->tail, (uint64_t *)(free_list->tail->data_address + free_list->tail->size));
+  print("----------initMM--------\n");
+  printInteger(newPage);
+  print("\n");
+  // printInteger(newPage2);
+  // print("\n");
+  // printInteger(newPage3);
+  // print("\n");
 }
 
 
@@ -56,9 +75,19 @@ page * getPage(size_t size){
   int freePages = free_list->freePages;
 
   while (freePages) {
+    if(freePages == 1 && currPage == free_list->tail){
+      currPage->free = 0;
+      (free_list->freePages)--;
+      createPageInTail();
+      //createNewPage((uint64_t *)free_list->tail + sizeof(page), size, free_list->tail, (uint64_t *)free_list->tail->data_address + free_list->tail->size);
+      joinPages(currPage);
+      return currPage;
+    }
     if (currPage->free && size <= currPage->size) {
+
       (free_list->freePages)--;
       currPage->free = 0;
+
       return currPage;
     }
     //como no voy a tener "paginas distintas" contiguas vacias, si no alcanza el tamaño de currPage para size, sigo de largo.
@@ -74,13 +103,16 @@ page * getPage(size_t size){
   }
   //si todas las paginas estan ocupadas o no da el tamaño para almacenar size_t y
   //la ultima pagina esta libre empiezo usando esa y veo si hace falta agregar mas
-  if (free_list->tail->free && size <= free_list->tail->size) {
+  if (free_list->tail->free) {
     currPage = free_list->tail;
     currPage->size = size;
+    //createNewPage((uint64_t *)free_list->tail + sizeof(page), size, free_list->tail, (uint64_t *)free_list->tail->data_address + free_list->tail->size);
   } else {
-    currPage = createNewPage((uint64_t *)(free_list->tail + sizeof(page)), size, free_list->tail, (uint64_t *)(free_list->tail->data_address + free_list->tail->size));
+    //currPage = createNewPage((uint64_t *)free_list->tail + sizeof(page), size, free_list->tail, (uint64_t *)free_list->tail->data_address + free_list->tail->size);
+    createPageInTail();
+    currPage = free_list->tail;
   }
-
+  joinPages(currPage);
   currPage->free = 0;
   (free_list->freePages)--;
 
@@ -95,22 +127,23 @@ void splitPage(page * p, size_t usedSize){
   }
 
   if(p->size > usedSize){
-
     int freeSize = p->size - usedSize;
-    page * auxPage = p->next;
-    p->next = createNewPage((uint64_t *)(free_list->tail + sizeof(page)), freeSize, p, (uint64_t *)(p->data_address + usedSize));
-
-    p->next->next = auxPage;
     p->size = usedSize;
+    page * auxPage = p->next;
+    p->next = createNewPage((uint64_t *)p + sizeof(page), freeSize, p, p->data_address + p->size);
+    p->next->next = auxPage;
+
     if(auxPage != NULL){
+      printInteger(auxPage);
+      print("\n");
+      printInteger(auxPage->prev);
+      print("\n");
       auxPage->prev = p->next;
     }
 
-
-    if(p == free_list->tail){
-
-      free_list->tail = p->next;
-
+    if(p == free_list->tail)
+    {
+        free_list->tail = p->next;
     }
 
     (free_list->freePages)++;
@@ -165,9 +198,9 @@ void joinPages(page * p){
 }
 
 
-void pfree(void * data_address){
+void pfree(void * dataAddress){
   page * currPage = free_list->head;
-  while(currPage != NULL && currPage->data_address != data_address){
+  while(currPage != NULL && currPage->data_address != dataAddress){
     currPage = currPage->next;
   }
   if (currPage == NULL || currPage->free) {
@@ -181,6 +214,17 @@ void pfree(void * data_address){
 
 void * pmalloc(size_t size){
   page * returnPage = getPage(size);
+  print("--------getPage------\n");
+  printInteger(returnPage);
+  print("\n");
+  printInteger(size);
+  print("\n");
   splitPage(returnPage, size);
+  print("--------splitPage-------\n");
+  printInteger(returnPage);
+  print("\n");
+  printInteger(size);
+  print("\n");
+
   return returnPage->data_address;
 }
