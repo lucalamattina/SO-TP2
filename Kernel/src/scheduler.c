@@ -13,6 +13,7 @@ void initScheduler(){
   fakeStack(shell); //fake shell´s stack
   current = pList->first;
   setState(current->process->pid, RUNNING);
+  // print("%s\n", current->process->name);
   _runProcess(current->process->stackPointer);
 }
 
