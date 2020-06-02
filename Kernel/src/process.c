@@ -20,7 +20,6 @@ process * newProcess(char * name, int argc, char** argv, int priority, int (*ent
 	process->pid = pList->pidCount++;
 	process->entryPoint = entryPoint;
 	process->priority = priority;
-	// process->isForeground = isForeground;
 	process->state = READY;
 	process->argc = argc;
 	process->argv = argv;
@@ -107,6 +106,7 @@ void ps(){
 		switch(aux->process->state){
 			case READY: print("State: ");break;
 		}
+		aux = aux->next;
 	}
 }
 

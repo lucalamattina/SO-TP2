@@ -30,7 +30,6 @@ typedef struct process{
 	long int pid;
 	enum processState state;
 	int priority;
-	// int isForeground;
 	int fileDescriptors[MAX_FD];
 	uint64_t stackBase;
 	uint64_t stackTop;

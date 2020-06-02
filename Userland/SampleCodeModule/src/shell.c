@@ -1,5 +1,6 @@
 #include <shell.h>
 #include "test_util.h"
+#include <syscalls.h>
 // ----------------------------------------------------------------------------------
 // Este modulo es el modulo principal de Userland
 // A partir de este modulo se pueden seleccionar otros modulos a traves de la terminal
@@ -21,6 +22,8 @@
 #define STARWARS_COMMAND 10
 #define MARIO_COMMAND 11
 #define TEST_MM 12
+#define TESTPROC 13
+#define PS 14
 
 #define MAX_BLOCKS 128
 #define MAX_MEMORY 1024 //Should be around 80% of memory managed by the MM
@@ -31,8 +34,8 @@ typedef struct MM_rq{
 }mm_rq;
 
 //Todos los comandos disponibles
-const char *commands[] = {"help", "shutdown", "invalid", "time", "beep", "sleep", "date", "clear", "div", "credits", "starwars", "mario", "testmm"};
-const int commandCount = 14;
+const char *commands[] = {"help", "shutdown", "invalid", "time", "beep", "sleep", "date", "clear", "div", "credits", "starwars", "mario", "testmm", "testproc", "ps"};
+const int commandCount = 15;
 
 int getCommand(char *cmd);
 void generate_invalid_opc(void);
@@ -80,9 +83,28 @@ void test_mm(){
   }
 }
 
+void printplus(){
+  while(1){
+  print("+\n");
+  }
+}
 
+void printminus(){
+  while(1){
+  print("-\n");
+  }
+}
 
+void test_proc(){
 
+  int pid1 = sys_new_process("plus", 0, NULL, 10, printplus);
+  int pid2 = sys_new_process("minus", 0, NULL, 10, printminus);
+
+}
+
+void ps(){
+  sys_ps();
+}
 
 uint64_t *init_shell(void)
 {
@@ -230,6 +252,12 @@ void handle_command(int cmd)
 	case TEST_MM:
 		test_mm();
 		break;
+  case TESTPROC:
+    test_proc();
+    break;
+  case PS:
+    ps();
+    break;
 	}
 	print("\n");
 }
@@ -274,6 +302,8 @@ void display_help(void)
 	print("starwars - Makes a cool Star Wars sound!\n");
 	print("mario - Makes a cool Mario sound!\n");
 	print("testmm - Tests memory manager\n");
+  print("testproc - Tests processes\n");
+  print("ps - print process list\n");
 }
 
 void display_time(void)

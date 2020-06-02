@@ -2,6 +2,8 @@
 #include <naiveConsole.h>
 #include <stdint.h>
 #include <console.h>
+#include <scheduler.h>
+#include <MemoryManager.h>
 
 extern void hang();
 extern void over_clock(int rate);
@@ -27,6 +29,10 @@ void handle_sys_draw_pixel(int x, int y, int r, int g, int b);
 void * handle_pmalloc(size_t size);
 
 void handle_pfree(void * p);
+
+int handle_sys_new_process(char * name, int argc, char ** argv, int priority, int (*entryPoint) (int, char **));
+
+void handle_sys_ps();
 
 //Handler de la llamada a la int 80
 uint64_t handleSyscall(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, uint64_t r8, uint64_t r9){
@@ -66,6 +72,12 @@ uint64_t handleSyscall(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, u
         break;
       case FREE:
         handle_pfree(rsi);
+        break;
+      case NEWPROC:
+        handle_sys_new_process(rsi, rdx, rcx, r8, r9);
+        break;
+      case PS:
+        handle_sys_ps();
         break;
 	}
 	return 0;
@@ -127,4 +139,14 @@ void * handle_pmalloc(size_t size){
 
 void handle_pfree(void * p){
   pfree(p);
+}
+
+int handle_sys_new_process(char * name, int argc, char ** argv, int priority, int (*entryPoint) (int, char **)){
+  process * newp = newProcess(name, argc, argv, priority, entryPoint);
+  fakeStack(newp);
+  return newp->pid;
+}
+
+void handle_sys_ps(void){
+  ps();
 }

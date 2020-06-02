@@ -19,6 +19,8 @@
 #define SHUTDOWN 11
 #define MALLOC 12
 #define FREE 13
+#define NEWPROC 14
+#define PS 15
 
 void sys_write(int fd, const char *buf, int count);
 
@@ -45,5 +47,9 @@ void sys_shutdown();
 void * sys_malloc(size_t size);
 
 void sys_free(void * p);
+
+int sys_new_process(char * name, int argc, char ** argv, int priority, int (*entryPoint) (int, char **));
+
+void sys_ps();
 
 #endif
