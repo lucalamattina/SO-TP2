@@ -4,7 +4,6 @@ static int quantum;
 processNode * current;
 
 
-
 void initScheduler(){
   quantum = 2;
   current = NULL;
@@ -18,6 +17,8 @@ void initScheduler(){
 }
 
 
+
+
 void scheduler(uint64_t stackPointer){
   current->process->stackPointer = stackPointer;
   if(current->process->state == RUNNING){
@@ -27,13 +28,21 @@ void scheduler(uint64_t stackPointer){
     }
     setState(current->process->pid, READY);
   }
-   do {
-     if(current->next == NULL){
-       current = pList->first;
-     }
-     else{
-     current = current->next;
-   }
+
+  // while(current->process->state != READY){
+  //     if (current->next == NULL) {
+  //       current = pList->first;
+  //     }else{
+  //       current = current->next;
+  //     }
+  // }
+  do {
+    if(current->next == NULL){
+      current = pList->first;
+    }
+    else{
+      current = current->next;
+    }
   } while(current->process->state != READY);
   setState(current->process->pid, RUNNING);
   quantum = current->process->priority;

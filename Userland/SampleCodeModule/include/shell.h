@@ -36,4 +36,12 @@ void display_invalid_command(void);
 
 void test_mm(void);
 
+void test_proc();
+
+void ps();
+
+void nice(int nicepid, int nicepriority);
+
+void block(int blockpid);
+
 #endif

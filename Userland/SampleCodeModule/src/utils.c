@@ -184,11 +184,14 @@ char* reverse(char *buffer, int i, int j)
 }
 
 int atoi(const char* buffer, int len){
+	if(len == 0){
+		return -1;
+	}
 	int i = 0;
 	int result = 0;
 
 
-	while(buffer[i] != 0){
+	while(buffer[i] != 0 && len != 0){
 		result += (pow(10, --len) * (buffer[i] - 48));
 		i++;
 	}
@@ -328,6 +331,26 @@ int strcmp(const char * stra, const char * strb){
 	int result = 0;
 	int i;
 	for (i = 0; *(stra + i) != 0 && *(strb + i) != 0 && !result; i++){
+		if (*(stra + i) < *(strb + i)){
+			return -1;
+		} else if (*(stra + i) > *(strb + i)){
+			return 1;
+		}
+	}
+	if (*(stra + i) == 0 && *(strb + i) == 0 && result != 0){
+		return 0;
+	} else if (*(stra + i) != 0 && *(strb + i) == 0){
+		return 1;
+	} else if (*(stra + i) == 0 && *(strb + i) != 0){
+		return -1;
+	}
+	return result;
+}
+
+int strncmp(const char * stra, const char * strb, size_t n){
+	int result = 0;
+	int i;
+	for (i = 0; *(stra + i) != 0 && *(strb + i) != 0 && !result && i != n; i++){
 		if (*(stra + i) < *(strb + i)){
 			return -1;
 		} else if (*(stra + i) > *(strb + i)){

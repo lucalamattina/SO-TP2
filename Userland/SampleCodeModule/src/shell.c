@@ -1,5 +1,6 @@
 #include <shell.h>
 #include "test_util.h"
+#include <syscalls.h>
 // ----------------------------------------------------------------------------------
 // Este modulo es el modulo principal de Userland
 // A partir de este modulo se pueden seleccionar otros modulos a traves de la terminal
@@ -21,6 +22,11 @@
 #define STARWARS_COMMAND 10
 #define MARIO_COMMAND 11
 #define TEST_MM 12
+#define TESTPROC 13
+#define PS 14
+#define KILL 15
+#define NICE 16
+#define BLOCK 17
 
 #define MAX_BLOCKS 128
 #define MAX_MEMORY 1024 //Should be around 80% of memory managed by the MM
@@ -31,8 +37,10 @@ typedef struct MM_rq{
 }mm_rq;
 
 //Todos los comandos disponibles
-const char *commands[] = {"help", "shutdown", "invalid", "time", "beep", "sleep", "date", "clear", "div", "credits", "starwars", "mario", "testmm"};
-const int commandCount = 14;
+const char *commands[] = {"help", "shutdown", "invalid", "time", "beep", "sleep", "date", "clear", "div", "credits", "starwars", "mario", "testmm", "testproc", "ps", "kill", "nice", "block"};
+const int commandCount = 15;
+int pid;
+int priority;
 
 int getCommand(char *cmd);
 void generate_invalid_opc(void);
@@ -80,9 +88,48 @@ void test_mm(){
   }
 }
 
+void printplus(){
+    print("+\n");
+  while(1){
+  }
+}
 
+void printminus(){
 
+  print("-\n");
+  while(1){
+  }
+}
 
+void test_proc(){
+
+  // int pid1 = sys_new_process("plus", 0, NULL, 10, printplus);
+  // int pid2 = sys_new_process("minus", 0, NULL, 10, printminus);
+  void * aux = sys_malloc(40);
+  // printf("%d\n", pid1);
+  // printf("%d\n", pid2);
+  printf("%d\n", aux);
+  sys_free(aux);
+  void * aux2 = sys_malloc(60);
+  printf("%d\n", aux2);
+
+}
+
+void ps(){
+  sys_ps();
+}
+
+void kill(int killpid){
+  sys_kill(killpid);
+}
+
+void block(int blockpid){
+  sys_block(blockpid);
+}
+
+void nice(int nicepid, int nicepriority){
+  sys_nice(nicepid, nicepriority);
+}
 
 uint64_t *init_shell(void)
 {
@@ -168,14 +215,86 @@ int getCommand(char *cmd)
 {
 	//Itero el array de comandos para ver cual es el que se elige
 	int result = INVALID_COMMAND;
+
 	for (int i = 0; i < commandCount && result == INVALID_COMMAND; i++)
 	{
 		//En el caso de que sean iguales
 		if (!strcmp(cmd, commands[i]))
 		{
-			result = i;
+			return i;
 		}
 	}
+
+  if(!strncmp(cmd, "kill ", 4)){
+    char * cmdaux = cmd+5;
+    int j = 0;
+
+    printf("%s", cmdaux);
+    while(*cmdaux != 0){
+      if(!isNumeric(*cmdaux)){
+        return result;
+      }
+      cmdaux += 1;
+      j++;
+    }
+    pid = atoi(cmd + 5,j);
+    if(pid == -1){
+      return result;
+    }
+    return KILL;
+  }
+
+  if(!strncmp(cmd, "block ", 5)){
+    char * cmdaux2 = cmd+6;
+    int a = 0;
+
+    printf("%c", *cmdaux2);
+    while(*cmdaux2 != 0){
+      if(!isNumeric(*cmdaux2)){
+        return result;
+      }
+      cmdaux2 += 1;
+      a++;
+    }
+    pid = atoi(cmd + 6,a);
+    if(pid == -1){
+      return result;
+    }
+    printf("%d\n", pid);
+    return BLOCK;
+  }
+
+  if(!strncmp(cmd, "nice ", 4)){
+    char * cmdaux3 = cmd+5;
+    int b = 0;
+    while(*cmdaux3 != ' '){
+      if(!isNumeric(*cmdaux3)){
+        return result;
+      }
+      cmdaux3 += 1;
+      b++;
+    }
+    pid = atoi(cmd + 5,b);
+    printf("%d\n", pid);
+    if(pid == -1){
+      return result;
+    }
+    int x = 0;
+    cmdaux3 += 1;
+    while(*cmdaux3 != 0){
+      if(!isNumeric(*cmdaux3)){
+        return result;
+      }
+      cmdaux3 += 1;
+      x++;
+    }
+    priority = atoi(cmd + 5 + b + 1, x);
+    if(priority == -1){
+      return result;
+    }
+    return NICE;
+  }
+
 	return result;
 }
 
@@ -230,6 +349,21 @@ void handle_command(int cmd)
 	case TEST_MM:
 		test_mm();
 		break;
+  case TESTPROC:
+    test_proc();
+    break;
+  case PS:
+    ps();
+    break;
+  case KILL:
+    kill(pid);
+    break;
+  case NICE:
+    nice(pid, priority);
+    break;
+  case BLOCK:
+    block(pid);
+    break;
 	}
 	print("\n");
 }
@@ -274,6 +408,11 @@ void display_help(void)
 	print("starwars - Makes a cool Star Wars sound!\n");
 	print("mario - Makes a cool Mario sound!\n");
 	print("testmm - Tests memory manager\n");
+  print("testproc - Tests processes\n");
+  print("ps - Print basic information abouth each process\n");
+  print("kill - Kill a process given it's pid\n");
+  print("nice - Changes a process' priority given it's pid and new priority\n");
+  print("block - Blocks a process given it's pid\n");
 }
 
 void display_time(void)

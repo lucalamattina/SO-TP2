@@ -146,7 +146,7 @@ int isAlpha(char c){
 }
 
 int isNumeric(char c){
-  return c>= 48 || c <= 57;
+  return c>= 48 && c <= 57;
 }
 
 int isArrow(char c){
