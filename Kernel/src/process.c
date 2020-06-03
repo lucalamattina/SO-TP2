@@ -112,6 +112,7 @@ void freeNode(processNode * node){
 
 void ps(){
 	processNode * aux = pList->first;
+	print("---------------------------\n");
 	while(aux!=NULL){
 		print("Name: %s \n", aux->process->name);
 		print("PID: %d \n", aux->process->pid);

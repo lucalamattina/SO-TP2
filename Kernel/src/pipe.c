@@ -1,6 +1,8 @@
 #include <pipe.h>
 #include <process.h>
 
+pipe pipeList[MAX_PIPES];
+
 void initPipes(){
     for(int i=0; i<MAX_PIPES; i++){
         for(int j=0;j<MAX_BUFF_SIZE;j++){
@@ -16,7 +18,7 @@ void initPipes(){
 int newPipe(process * target){
     for(int i=0; i<MAX_PIPES;i++){
         if(pipeList[i].available == 1){
-            
+
         }
     }
 }
