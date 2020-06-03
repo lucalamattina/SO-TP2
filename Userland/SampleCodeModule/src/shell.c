@@ -89,30 +89,29 @@ void test_mm(){
 }
 
 void printplus(){
-    print("+\n");
+    int i = 0;
   while(1){
+    printf("%d\n", i);
+    i++;
   }
 }
 
 void printminus(){
 
-  print("-\n");
+
   while(1){
+    print("-\n");
   }
 }
 
 void test_proc(){
 
-  // int pid1 = sys_new_process("plus", 0, NULL, 10, printplus);
-  // int pid2 = sys_new_process("minus", 0, NULL, 10, printminus);
-  void * aux = sys_malloc(40);
-  // printf("%d\n", pid1);
-  // printf("%d\n", pid2);
-  printf("%d\n", aux);
-  sys_free(aux);
-  void * aux2 = sys_malloc(60);
-  printf("%d\n", aux2);
-
+  int pid1 = sys_new_process("plus", 0, NULL, 10, printplus);
+  int pid2 = sys_new_process("minus", 0, NULL, 10, printminus);
+  // void * aux = sys_malloc(40);
+  printf("%d\n", pid1);
+  printf("%d\n", pid2);
+  // printf("%d\n", aux);
 }
 
 void ps(){

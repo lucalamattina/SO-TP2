@@ -75,14 +75,6 @@ page * getPage(size_t size){
   int freePages = free_list->freePages;
 
   while (freePages) {
-    // if(freePages == 1 && currPage == free_list->tail){
-    //   currPage->free = 0;
-    //   (free_list->freePages)--;
-    //   createPageInTail();
-    //   //createNewPage((uint64_t *)free_list->tail + sizeof(page), size, free_list->tail, (uint64_t *)free_list->tail->data_address + free_list->tail->size);
-    //   joinPages(currPage);
-    //   return currPage;
-    // }
     if (currPage->free && size <= currPage->size) {
 
       (free_list->freePages)--;
