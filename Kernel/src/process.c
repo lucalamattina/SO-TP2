@@ -76,6 +76,14 @@ void removeProcess(int pid){
 }
 }
 
+processNode * getProcessNode(int pid){
+	processNode * aux = pList->first;
+  while(aux!=NULL && aux->process->pid != pid){
+    aux = aux->next;
+  }
+	return aux;
+}
+
 process * getProcess(int pid){
 	processNode * aux = pList->first;
   while(aux!=NULL && aux->process->pid != pid){
@@ -105,7 +113,7 @@ void freeNode(processNode * node){
 void ps(){
 	processNode * aux = pList->first;
 	while(aux!=NULL){
-		print("Process: %s \n", aux->process->name);
+		print("Name: %s \n", aux->process->name);
 		print("PID: %d \n", aux->process->pid);
 		print("Priority: %d \n", aux->process->priority);
 		print("StackPointer: %d \n", aux->process->stackPointer);
@@ -116,6 +124,7 @@ void ps(){
 			case BLOCKED: print("State: BLOCKED\n");break;
 			case DEAD: print("State: DEAD\n");break;
 		}
+		print("---------------------------");
 		aux = aux->next;
 	}
 }
