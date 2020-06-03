@@ -21,6 +21,9 @@
 #define FREE 13
 #define NEWPROC 14
 #define PS 15
+#define KILL 16
+#define NICE 17
+#define BLOCK 18
 
 void sys_write(int fd, const char *buf, int count);
 
@@ -51,5 +54,11 @@ void sys_free(void * p);
 int sys_new_process(char * name, int argc, char ** argv, int priority, int (*entryPoint) (int, char **));
 
 void sys_ps();
+
+void sys_kill(int pid);
+
+void sys_nice(int pid, int priority);
+
+void sys_block(int pid);
 
 #endif

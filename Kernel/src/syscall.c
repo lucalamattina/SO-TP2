@@ -34,6 +34,12 @@ int handle_sys_new_process(char * name, int argc, char ** argv, int priority, in
 
 void handle_sys_ps();
 
+void handle_sys_kill(int pid);
+
+void handle_sys_block(int pid);
+
+void handle_sys_nice(int pid, int priority);
+
 //Handler de la llamada a la int 80
 uint64_t handleSyscall(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, uint64_t r8, uint64_t r9){
     switch(rdi){
@@ -74,11 +80,21 @@ uint64_t handleSyscall(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, u
         handle_pfree(rsi);
         break;
       case NEWPROC:
-        handle_sys_new_process(rsi, rdx, rcx, r8, r9);
+        return handle_sys_new_process(rsi, rdx, rcx, r8, r9);
         break;
       case PS:
         handle_sys_ps();
         break;
+      case KILL:
+        handle_sys_kill(rsi);
+        break;
+      case NICE:
+        handle_sys_nice(rsi, rdx);
+        break;
+      case BLOCK:
+        handle_sys_block(rsi);
+        break;
+
 	}
 	return 0;
 }
@@ -143,10 +159,23 @@ void handle_pfree(void * p){
 
 int handle_sys_new_process(char * name, int argc, char ** argv, int priority, int (*entryPoint) (int, char **)){
   process * newp = newProcess(name, argc, argv, priority, entryPoint);
+  int ret = newp->pid;
   fakeStack(newp);
-  return newp->pid;
+  return ret;
 }
 
 void handle_sys_ps(void){
   ps();
+}
+
+void handle_sys_kill(int pid){
+  kill(pid);
+}
+
+void handle_sys_nice(int pid, int priority){
+  nice(pid, priority);
+}
+
+void handle_sys_block(int pid){
+  block(pid);
 }

@@ -27,7 +27,7 @@ typedef struct process{
 	int argc;
 	char **argv;
 	char * name;
-	long int pid;
+	int pid;
 	enum processState state;
 	int priority;
 	int fileDescriptors[MAX_FD];

@@ -64,10 +64,21 @@ void sys_free(void * p){
 }
 
 int sys_new_process(char * name, int argc, char ** argv, int priority, int (*entryPoint) (int, char **)){
-	int pid = _int80((uint64_t)NEWPROC, name, argc, argv, priority, entryPoint);
-	return pid;
+	return (int)_int80((uint64_t)NEWPROC, name, argc, argv, priority, entryPoint);
 }
 
 void sys_ps(void){
 	_int80((uint64_t)PS, 0, 0, 0, 0, 0);
+}
+
+void sys_kill(int pid){
+	_int80((uint64_t)KILL, (uint64_t)pid, 0, 0, 0, 0);
+}
+
+void sys_nice(int pid, int priority){
+	_int80((uint64_t)NICE, (uint64_t)pid, (uint64_t)priority, 0, 0, 0);
+}
+
+void sys_block(int pid){
+	_int80((uint64_t)BLOCK, (uint64_t)pid, 0, 0, 0, 0);
 }

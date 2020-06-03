@@ -40,4 +40,8 @@ void test_proc();
 
 void ps();
 
+void nice(int nicepid, int nicepriority);
+
+void block(int blockpid);
+
 #endif

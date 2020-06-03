@@ -92,6 +92,10 @@ void setState(int pid, processState state){
 }
 
 void freeNode(processNode * node){
+	node->prev->next = node->next;
+	if(node->next != NULL){
+		node->next->prev = node->prev;
+	}
 	pfree((void *)node->process->stackBase);
 	pfree((void *)node->process);
 	pfree((void *)node);
@@ -103,8 +107,14 @@ void ps(){
 	while(aux!=NULL){
 		print("Process: %s \n", aux->process->name);
 		print("PID: %d \n", aux->process->pid);
+		print("Priority: %d \n", aux->process->priority);
+		print("StackPointer: %d \n", aux->process->stackPointer);
+		print("BasePointer: %d \n", aux->process->stackBase);
 		switch(aux->process->state){
-			case READY: print("State: ");break;
+			case READY: print("State: READY\n");break;
+			case RUNNING: print("State: RUNNING\n");break;
+			case BLOCKED: print("State: BLOCKED\n");break;
+			case DEAD: print("State: DEAD\n");break;
 		}
 		aux = aux->next;
 	}
@@ -116,13 +126,17 @@ void block(int pid){
 			if(aux->state == BLOCKED){
 				aux->state = READY;
 			}
-			else if(aux->state!= DEAD){
-				aux->state == BLOCKED;
+			else if(aux->state != BLOCKED){
+				aux->state = BLOCKED;
 			}
 	}
 }
 
 void kill(int pid){
+	if(pid == 0){
+		print("You can't kill shell\n");
+		return;
+	}
 	setState(pid, DEAD);
 	processNode * aux = pList->first;
 	while( aux != NULL && aux->process->pid != pid ){
@@ -130,7 +144,10 @@ void kill(int pid){
 	}
 	if(aux!=NULL){
 		freeNode(aux);
+		return;
 	}
+	print("Invalid PID\n");
+
 }
 
 void nice(int pid, int priority){
