@@ -117,7 +117,7 @@ void block(int pid){
 				aux->state = READY;
 			}
 			else if(aux->state!= DEAD){
-				aux->state == BLOCKED;
+				aux->state = BLOCKED;
 			}
 	}
 }

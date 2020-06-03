@@ -27,21 +27,14 @@ void scheduler(uint64_t stackPointer){
     }
     setState(current->process->pid, READY);
   }
-  while(current->process->state != READY){
-      if (current->next == NULL) {
-        current = pList->first;
-      }else{
-        current = current->next;
-      }
-  }
-  // do {
-  //   if(current->next == NULL){
-  //     current = pList->first;
-  //   }
-  //   else{
-  //     current = current->next;
-  //   }
-  // } while(current->process->state != READY);
+   do {
+     if(current->next == NULL){
+       current = pList->first;
+     }
+     else{
+     current = current->next;
+   }
+  } while(current->process->state != READY);
   setState(current->process->pid, RUNNING);
   quantum = current->process->priority;
   _runProcess(current->process->stackPointer);
@@ -56,4 +49,8 @@ void wrapper(int (*entryPoint)(int, char**), int argc, char **argv){
   entryPoint(argc, argv);
   current->process->state = DEAD;
   _interrupt();
+}
+
+process * getCurrentProcess(){
+  return current->process;
 }
