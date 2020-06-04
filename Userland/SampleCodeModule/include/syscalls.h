@@ -24,6 +24,7 @@
 #define KILL 16
 #define NICE 17
 #define BLOCK 18
+#define MEM 19
 
 void sys_write(int fd, const char *buf, int count);
 
@@ -60,5 +61,7 @@ void sys_kill(int pid);
 void sys_nice(int pid, int priority);
 
 void sys_block(int pid);
+
+void sys_mem();
 
 #endif

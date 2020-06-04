@@ -24,6 +24,8 @@ typedef struct freeList{
   struct page * tail;
   size_t freePages;
   size_t totalPages;
+  size_t memoryAvailable;
+  size_t usedMemory;
 }freeList;
 
 extern freeList * free_list;
@@ -34,5 +36,5 @@ page * createNewPage(uint64_t * page_address, size_t allocSize, page * prev, uin
 page * getPage(size_t size);
 void splitPage(page * p, size_t usedSize);
 void joinPages(page * p);
-
+void mem();
 #endif
