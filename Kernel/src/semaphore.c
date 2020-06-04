@@ -1,6 +1,6 @@
 #include <semaphore.h>
 
-
+sem* semList[MAX_SEM_COUNT];
 
 void initializeSemList(){
     for(int i=0; i<MAX_SEM_COUNT; i++){
@@ -42,8 +42,7 @@ sem * semOpen(char* name){
 void semClose(sem * semaforo){
     for(int i=0; i<MAX_SEM_COUNT; i++){
         if(semList[i] != NULL && semList[i]==semaforo){
-            free(semList[i]);
-            return;
+            pfree(semList[i]);
         }
     }
 }
@@ -81,5 +80,3 @@ void semWait(sem* semaforo){
         setState(semaforo->processList[pos], BLOCKED);
     }
 }
-
-

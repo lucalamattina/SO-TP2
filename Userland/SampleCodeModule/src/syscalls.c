@@ -82,3 +82,7 @@ void sys_nice(int pid, int priority){
 void sys_block(int pid){
 	_int80((uint64_t)BLOCK, (uint64_t)pid, 0, 0, 0, 0);
 }
+
+void sys_mem(){
+	_int80((uint64_t)MEM, 0, 0, 0, 0, 0);
+}

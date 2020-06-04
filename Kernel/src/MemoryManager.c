@@ -54,6 +54,8 @@ void initializeFreeList(uint64_t * free_list_address){
   free_list->tail = NULL;
   free_list->freePages = 1;
   free_list->totalPages = 1;
+  free_list->memoryAvailable = MEMORY_SIZE;
+  free_list->usedMemory = 0;
   //creo una nueva pagina ubicada de forma contigua a la lista, y dejo lugar para todas las demas paginas, por eso apunto el data_address al "final" de toda la lista
   page * newPage = createNewPage(free_list_address + sizeof(freeList), PAGE_SIZE, NULL, free_list_address + sizeof(freeList) + sizeof(page) * MAX_PAGE_QUANTITY);
   // page * newPage2 = createNewPage((uint64_t *)(free_list->tail + sizeof(page)), 4080, free_list->tail, (uint64_t *)(free_list->tail->data_address + free_list->tail->size));
@@ -75,19 +77,9 @@ page * getPage(size_t size){
   int freePages = free_list->freePages;
 
   while (freePages) {
-    // if(freePages == 1 && currPage == free_list->tail){
-    //   currPage->free = 0;
-    //   (free_list->freePages)--;
-    //   createPageInTail();
-    //   //createNewPage((uint64_t *)free_list->tail + sizeof(page), size, free_list->tail, (uint64_t *)free_list->tail->data_address + free_list->tail->size);
-    //   joinPages(currPage);
-    //   return currPage;
-    // }
     if (currPage->free && size <= currPage->size) {
-
       (free_list->freePages)--;
       currPage->free = 0;
-
       return currPage;
     }
     //como no voy a tener "paginas distintas" contiguas vacias, si no alcanza el tamaño de currPage para size, sigo de largo.
@@ -101,20 +93,27 @@ page * getPage(size_t size){
       currPage = currPage->next;
     }
   }
+
+  int auxSize;
   //si todas las paginas estan ocupadas o no da el tamaño para almacenar size_t y
   //la ultima pagina esta libre empiezo usando esa y veo si hace falta agregar mas
   if (free_list->tail->free) {
     currPage = free_list->tail;
-    currPage->size = size;
+
     //createNewPage((uint64_t *)free_list->tail + sizeof(page), size, free_list->tail, (uint64_t *)free_list->tail->data_address + free_list->tail->size);
   } else {
     //currPage = createNewPage((uint64_t *)free_list->tail + sizeof(page), size, free_list->tail, (uint64_t *)free_list->tail->data_address + free_list->tail->size);
     createPageInTail();
     currPage = free_list->tail;
   }
-  joinPages(currPage);
+  auxSize = size - currPage->size;
+  while(auxSize >= 0){
+    createPageInTail();
+    auxSize -= PAGE_SIZE;
+  }
   currPage->free = 0;
   (free_list->freePages)--;
+  joinPages(currPage);
 
   return currPage;
 
@@ -208,6 +207,9 @@ void pfree(void * dataAddress){
   }
   currPage->free = 1;
   (free_list->freePages)++;
+
+  free_list->usedMemory -= currPage->size;
+  free_list->memoryAvailable += currPage->size;
   joinPages(currPage);
 
 }
@@ -219,12 +221,23 @@ void * pmalloc(size_t size){
   // print("\n");
   // printInteger(size);
   // print("\n");
-  // splitPage(returnPage, size);
+  splitPage(returnPage, size);
   // print("--------splitPage-------\n");
   // printInteger(returnPage);
   // print("\n");
   // printInteger(size);
   // print("\n");
-
+  free_list->usedMemory += returnPage->size;
+  free_list->memoryAvailable -= returnPage->size;
   return returnPage->data_address;
+}
+
+void mem(){
+  print("---------------------------\n");
+  print("Total pages: %d\n", free_list->totalPages);
+  print("Free pages: %d\n", free_list->freePages);
+  print("Total memory size: %d\n", MEMORY_SIZE);
+  print("Memory available (in bytes): %d\n", free_list->memoryAvailable);
+  print("Memory in use (in bytes): %d\n", free_list->usedMemory);
+  print("---------------------------\n");
 }

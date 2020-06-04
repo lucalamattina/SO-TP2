@@ -24,9 +24,11 @@
 #define TEST_MM 12
 #define TESTPROC 13
 #define PS 14
-#define KILL 15
-#define NICE 16
-#define BLOCK 17
+#define MEM 15
+#define KILL 16
+#define NICE 17
+#define BLOCK 18
+
 
 #define MAX_BLOCKS 128
 #define MAX_MEMORY 1024 //Should be around 80% of memory managed by the MM
@@ -37,8 +39,8 @@ typedef struct MM_rq{
 }mm_rq;
 
 //Todos los comandos disponibles
-const char *commands[] = {"help", "shutdown", "invalid", "time", "beep", "sleep", "date", "clear", "div", "credits", "starwars", "mario", "testmm", "testproc", "ps", "kill", "nice", "block"};
-const int commandCount = 15;
+const char *commands[] = {"help", "shutdown", "invalid", "time", "beep", "sleep", "date", "clear", "div", "credits", "starwars", "mario", "testmm", "testproc", "ps", "mem", "kill", "nice", "block"};
+const int commandCount = 16;
 int pid;
 int priority;
 
@@ -59,7 +61,7 @@ void test_mm(){
 	while(1){
     rq = 0;
     total = 0;
-
+    //printminus();
     // Request as many blocks as we can
     while(rq < MAX_BLOCKS && total < MAX_MEMORY){
       mm_rqs[rq].size = GetUniform(MAX_MEMORY - total - 1) + 1;
@@ -89,34 +91,36 @@ void test_mm(){
 }
 
 void printplus(){
-    print("+\n");
+    int i = 0;
   while(1){
+    printf("%d\n", i);
+    i++;
   }
 }
 
 void printminus(){
 
-  print("-\n");
+
   while(1){
+    print("-\n");
   }
 }
 
 void test_proc(){
 
-  // int pid1 = sys_new_process("plus", 0, NULL, 10, printplus);
-  // int pid2 = sys_new_process("minus", 0, NULL, 10, printminus);
-  void * aux = sys_malloc(40);
-  // printf("%d\n", pid1);
-  // printf("%d\n", pid2);
-  printf("%d\n", aux);
-  sys_free(aux);
-  void * aux2 = sys_malloc(60);
-  printf("%d\n", aux2);
+  int pid1 = sys_new_process("plus", 0, NULL, 10, printplus);
+  int pid2 = sys_new_process("minus", 0, NULL, 10, printminus);
 
+  printf("%d\n", pid1);
+  printf("%d\n", pid2);
 }
 
 void ps(){
   sys_ps();
+}
+
+void mem(){
+  sys_mem();
 }
 
 void kill(int killpid){
@@ -355,6 +359,9 @@ void handle_command(int cmd)
   case PS:
     ps();
     break;
+  case MEM:
+    mem();
+    break;
   case KILL:
     kill(pid);
     break;
@@ -409,7 +416,8 @@ void display_help(void)
 	print("mario - Makes a cool Mario sound!\n");
 	print("testmm - Tests memory manager\n");
   print("testproc - Tests processes\n");
-  print("ps - Print basic information abouth each process\n");
+  print("ps - Prints basic information abouth each process\n");
+  print("mem - Prints memory state\n");
   print("kill - Kill a process given it's pid\n");
   print("nice - Changes a process' priority given it's pid and new priority\n");
   print("block - Blocks a process given it's pid\n");
