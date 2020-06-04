@@ -2,6 +2,7 @@
 #define SEMAPHORE_H
 
 #define MAX_SEM_COUNT 30
+#define MAX_PROCESS_COUNT 20
 
 #include <process.h>
 #include <lib.h>
@@ -14,7 +15,7 @@
 typedef struct sem{
     uint64_t state;
     char* name;
-    processNode* processList;
+    int processList[MAX_PROCESS_COUNT];
 }sem;
 
 extern sem* semList[MAX_SEM_COUNT];
