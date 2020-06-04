@@ -124,7 +124,7 @@ void ps(){
 			case BLOCKED: print("State: BLOCKED\n");break;
 			case DEAD: print("State: DEAD\n");break;
 		}
-		print("---------------------------");
+		print("---------------------------n");
 		aux = aux->next;
 	}
 }
