@@ -1,4 +1,7 @@
-Image/*
+Image/packedKernel.bin
+Image/x64BareBonesImage.img
+Image/x64BareBonesImage.qcow2
+Image/x64BareBonesImage.vmdk 
 
 # Prerequisites
 *.d
