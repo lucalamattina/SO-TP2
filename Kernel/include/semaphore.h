@@ -20,4 +20,13 @@ typedef struct sem{
 
 extern sem* semList[MAX_SEM_COUNT];
 
+void initializeSemList();
+int getAvailableSemPos();
+int getAvailableProcessPos(sem* semaforo);
+sem * semOpen(char* name);
+void semClose(sem * semaforo);
+void semPost(sem* semaforo);
+void semWait(sem* semaforo);
+
+
 #endif

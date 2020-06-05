@@ -1,6 +1,6 @@
 #include <semaphore.h>
 
-sem* semList[MAX_SEM_COUNT];
+sem * semList[MAX_SEM_COUNT];
 
 void initializeSemList(){
     for(int i=0; i<MAX_SEM_COUNT; i++){
@@ -17,7 +17,7 @@ int getAvailableSemPos(){
     return -1;
 }
 
-int getAvailableProcessPos(*sem semaforo){
+int getAvailableProcessPos(sem* semaforo){
     for(int i=0; i<MAX_PROCESS_COUNT;i++){
         if(semaforo->processList[i]==-1){
             return i;
@@ -27,16 +27,17 @@ int getAvailableProcessPos(*sem semaforo){
 }
 
 sem * semOpen(char* name){
-    int pos = getAvailablePos();
+    int pos = getAvailableSemPos();
     if(pos == -1){
         return NULL;
     }
     semList[pos]=pmalloc(sizeof(sem));
     semList[pos]->name=name;
-    semList[pos]->state=0;
+    semList[pos]->state=1;
     for(int i=0; i<MAX_PROCESS_COUNT; i++){
         semList[pos]->processList[i] = -1;
     }
+    return semList[pos];
 }
 
 void semClose(sem * semaforo){
@@ -50,26 +51,19 @@ void semClose(sem * semaforo){
 void semPost(sem* semaforo){
     (semaforo->state)+=1;
     int i;
-    for( i = 0; semaforo->processList[i] != current->process->pid; i++){
+
+    for(i = 0; i<MAX_PROCESS_COUNT && semaforo->processList[i]==-1; i++){
     }
-    semaforo->processList[i] = -1;
-    if(semaforo->processList[0]!=-1){
-        int pos = -1;
-        for(int j=0; MAX_PROCESS_COUNT; j++){
-            if(semaforo->processList[j] != -1){
-                pos = j;
-            }
-        }
-        if(pos != -1){
-            setState(semaforo->processList[pos], READY);
-        }
+    if(i<MAX_PROCESS_COUNT){
+        setState(semaforo->processList[i], READY);
+        semaforo->processList[i]=-1;
     }
 }
 
 void semWait(sem* semaforo){
     if(semaforo->state>0){
         semaforo->state-=1;
-        
+        return;
     }
     if(semaforo->state==0){
         int pos = getAvailableProcessPos(semaforo);

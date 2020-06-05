@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <process.h>
 
+extern processNode * current;
+
 void _runProcess(uint64_t rsp);
 void fakeStack(process * process);
 

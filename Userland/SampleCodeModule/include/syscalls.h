@@ -21,6 +21,7 @@
 #define FREE 13
 #define NEWPROC 14
 #define PS 15
+#define OPEN 15
 #define KILL 16
 #define NICE 17
 #define BLOCK 18
@@ -63,5 +64,13 @@ void sys_nice(int pid, int priority);
 void sys_block(int pid);
 
 void sys_mem();
+
+void sys_semOpen(char * name);
+
+void sys_semPost(sem * sema);
+
+void sys_semWait(sem * sema);
+
+
 
 #endif
