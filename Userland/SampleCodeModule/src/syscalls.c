@@ -63,8 +63,9 @@ void sys_free(void * p){
 	_int80((uint64_t)FREE, (uint64_t)p,0,0,0,0);
 }
 
-int sys_new_process(char * name, int argc, char ** argv, int priority, int (*entryPoint) (int, char **)){
-	return (int)_int80((uint64_t)NEWPROC, name, argc, argv, priority, entryPoint);
+int sys_new_process(char * name, int argc, char ** argv, int priority, int isForeground, int (*entryPoint) (int, char **)){
+	int priorityAux = isForeground == 0 ? (-1) * priority : priority;
+	return (int)_int80((uint64_t)NEWPROC,(uint64_t) name, (uint64_t)argc, (uint64_t)argv, (uint64_t)priorityAux, (uint64_t)entryPoint);
 }
 
 void sys_ps(void){
@@ -87,14 +88,18 @@ void sys_mem(){
 	_int80((uint64_t)MEM, 0, 0, 0, 0, 0);
 }
 
-sem * sys_semOpen(char * name){
-	return (sem *)_int80((uint64_t)OPEN, name, 0, 0, 0, 0);
+int * sys_sem_open(char * name){
+	return (int *)_int80((uint64_t)SEMOPEN, (uint64_t)name, 0, 0, 0, 0);
 }
 
-void sys_semPost(sem * sema){
-	_int80((uint64_t)POST, sema, 0, 0, 0, 0);
+void sys_sem_post(int * sema){
+	_int80((uint64_t)SEMPOST, (uint64_t)sema, 0, 0, 0, 0);
 }
 
-void sys_semWait(sem * sema){
-	_int80((uint64_t)WAIT, sema, 0, 0, 0, 0);
+void sys_sem_wait(int * sema){
+	_int80((uint64_t)SEMWAIT, (uint64_t)sema, 0, 0, 0, 0);
+}
+
+void sys_sem_close(int * sema){
+	_int80((uint64_t)SEMCLOSE, (uint64_t)sema, 0, 0, 0, 0);
 }

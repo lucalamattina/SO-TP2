@@ -11,6 +11,7 @@
 #include <stdarg.h>
 #include <videoDriver.h>
 
+
 void init_console();
 
 void backspace();

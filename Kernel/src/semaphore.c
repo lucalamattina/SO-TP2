@@ -26,7 +26,7 @@ int getAvailableProcessPos(sem* semaforo){
     return -1;
 }
 
-sem * semOpen(char* name){
+int * semOpen(char * name){
     int pos = getAvailableSemPos();
     if(pos == -1){
         return NULL;
@@ -34,22 +34,22 @@ sem * semOpen(char* name){
     semList[pos]=pmalloc(sizeof(sem));
     semList[pos]->name=name;
     semList[pos]->state=1;
+    semList[pos]->id = pos;
     for(int i=0; i<MAX_PROCESS_COUNT; i++){
         semList[pos]->processList[i] = -1;
     }
-    return semList[pos];
+    return &semList[pos]->id;
 }
 
-void semClose(sem * semaforo){
-    for(int i=0; i<MAX_SEM_COUNT; i++){
-        if(semList[i] != NULL && semList[i]==semaforo){
-            pfree(semList[i]);
-            semList[i]=NULL;
-        }
-    }
+void semClose(int * semid){
+    sem * semaforo = semList[*semid];
+    pfree(semaforo);
+    semList[*semid] = NULL;
+
 }
 
-void semPost(sem* semaforo){
+void semPost(int * semid){
+    sem * semaforo = semList[*semid];
     (semaforo->state)+=1;
     int i;
 
@@ -61,7 +61,8 @@ void semPost(sem* semaforo){
     }
 }
 
-void semWait(sem* semaforo){
+void semWait(int * semid){
+    sem * semaforo = semList[*semid];
     if(semaforo->state>0){
         semaforo->state-=1;
         return;
@@ -73,22 +74,6 @@ void semWait(sem* semaforo){
         }
         semaforo->processList[pos] = current->process->pid;
         setState(semaforo->processList[pos], BLOCKED);
+        _interrupt();
     }
-}
-
-void sem(){
-	print("---------------------------\n");
-	for(i=0;i<MAX_SEM_COUNT;i++){
-        if(semList[i]!=NULL){
-		print("Name: %s \n", semList[i]->name);
-		print("PID: %d \n", semList[i]->state);
-        print("Blocked porcesses: { \n";
-		for(int j = 0; j != MAX_PROCESS_COUNT; j++){
-            if(semList[i]->processList[j]!=-1){
-                print(" PID = %d \n", semList[i]->processList[j]);
-            }
-        }
-        print("}\n");
-		print("---------------------------\n");
-	}
 }

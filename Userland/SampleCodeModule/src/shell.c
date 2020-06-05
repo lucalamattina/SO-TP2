@@ -29,6 +29,8 @@
 #define NICE 17
 #define BLOCK 18
 
+#define FOREGROUND 1
+#define BACKGROUND 0
 
 #define MAX_BLOCKS 128
 #define MAX_MEMORY 1024 //Should be around 80% of memory managed by the MM
@@ -51,7 +53,7 @@ void display_credits(void);
 void make_starwars(void);
 void make_mario(void);
 
-
+int * sema;
 
 void test_mm(){
   mm_rq mm_rqs[MAX_BLOCKS];
@@ -91,26 +93,29 @@ void test_mm(){
 }
 
 void p1(){
-	semWait(sema);
-	printf("primero\n");
-	sys_sleep(5000);
-	sys_ps(void);
-	semPost(sema);
+    // printf("chau\n");
+  	sys_sem_wait(sema);
+  	for(int x = 0; x < 100; x++){
+      printf("1\n");
+    }
+  	sys_sem_post(sema);
+
 }
 
 void p2(){
-	semWait(sema);
-	printf("segundo\n");
-	sys_sleep(5000);
-	sys_ps(void);
-	semPost(sema);
+  	sys_sem_wait(sema);
+    for(int y = 0; y < 100; y++){
+      printf("2\n");
+    }
+  	sys_sem_post(sema);
 }
 
 void test_proc(){
+  sema = sys_sem_open("sema");
+  int pid1 = sys_new_process("p1", 0, NULL, 1, FOREGROUND, p1);
+  // printf("hola\n");
+  int pid2 = sys_new_process("p2", 0, NULL, 1, FOREGROUND, p2);
 
-  int pid1 = sys_new_process("p1", 0, NULL, 10, p1);
-  int pid2 = sys_new_process("p2", 0, NULL, 10, p2);
-  sem * sema = semOpen("sema");
 }
 
 void ps(){

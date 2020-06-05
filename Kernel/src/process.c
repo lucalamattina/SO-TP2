@@ -1,8 +1,7 @@
 #include <process.h>
 
 processList * pList; //agregamos esto en el .h y .c creo que es lo que falla
-void addProcess(process * process);
-struct processNode * removeProcessList(processNode * node, process * process);
+
 
 void initList(void){
 	pList = pmalloc(sizeof(pList));
@@ -109,7 +108,8 @@ void ps(){
 	while(aux!=NULL){
 		print("Name: %s \n", aux->process->name);
 		print("PID: %d \n", aux->process->pid);
-		print("Priority: %d \n", aux->process->priority);
+		print("Priority: %d \n", aux->process->priority < 0 ? aux->process->priority * (-1) : aux->process->priority);
+		print("Visibility: %s\n", aux->process->priority < 0 ? "background" : "foreground");
 		print("StackPointer: %d \n", aux->process->stackPointer);
 		print("BasePointer: %d \n", aux->process->stackBase);
 		switch(aux->process->state){
@@ -156,6 +156,10 @@ void kill(int pid){
 void nice(int pid, int priority){
 	process * aux = getProcess(pid);
 	if(aux != NULL){
-		aux->priority = priority;
+		if(aux->priority < 0){
+			aux->priority = priority * (-1);
+		} else{
+			aux->priority = priority;
+		}
 	}
 }

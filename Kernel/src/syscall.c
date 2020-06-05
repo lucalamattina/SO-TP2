@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <console.h>
 #include <scheduler.h>
-#include <MemoryManager.h>
+#include <semaphore.h>
 
 extern void hang();
 extern void over_clock(int rate);
@@ -42,11 +42,13 @@ void handle_sys_nice(int pid, int priority);
 
 void handle_sys_mem();
 
-sem * handle_sys_semOpen(char * name);
+int * handle_sys_sem_open(char * name);
 
-void handle_sys_semPost(sem * sema);
+void handle_sys_sem_post(int * sema);
 
-void handle_sys_semWait(sem * sema);
+void handle_sys_sem_wait(int * sema);
+
+void handle_sys_sem_close(int * sema);
 
 //Handler de la llamada a la int 80
 uint64_t handleSyscall(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, uint64_t r8, uint64_t r9){
@@ -105,14 +107,17 @@ uint64_t handleSyscall(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, u
       case MEM:
         handle_sys_mem();
         break;
-      case OPEN:
-        handle_sys_semOpen(rsi);
+      case SEMOPEN:
+        return (uint64_t)handle_sys_sem_open(rsi);
         break;
-      case POST:
-        handle_sys_semPost(rsi);
+      case SEMPOST:
+        handle_sys_sem_post(rsi);
         break;
-      case WAIT:
-        handle_sys_semWait(rsi);
+      case SEMWAIT:
+        handle_sys_sem_wait(rsi);
+        break;
+      case SEMCLOSE:
+        handle_sys_sem_close(rsi);
         break;
 
 	}
@@ -204,14 +209,18 @@ void handle_sys_mem(){
   mem();
 }
 
-sem * handle_sys_semOpen(char * name){
+int * handle_sys_sem_open(char * name){
   return semOpen(name);
 }
 
-void handle_sys_semPost(sem * sema){
+void handle_sys_sem_post(int * sema){
   semPost(sema);
 }
 
-void handle_sys_semWait(sem * sema){
+void handle_sys_sem_wait(int * sema){
   semWait(sema);
+}
+
+void handle_sys_sem_close(int * sema){
+  semClose(sema);
 }

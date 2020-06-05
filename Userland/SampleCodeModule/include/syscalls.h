@@ -21,13 +21,14 @@
 #define FREE 13
 #define NEWPROC 14
 #define PS 15
-#define OPEN 16
-#define POST 17
-#define WAIT 18
-#define KILL 19
-#define NICE 20
-#define BLOCK 21
-#define MEM 22
+#define KILL 16
+#define NICE 17
+#define BLOCK 18
+#define MEM 19
+#define SEMOPEN 20
+#define SEMPOST 21
+#define SEMWAIT 22
+#define SEMCLOSE 23
 
 void sys_write(int fd, const char *buf, int count);
 
@@ -55,7 +56,7 @@ void * sys_malloc(size_t size);
 
 void sys_free(void * p);
 
-int sys_new_process(char * name, int argc, char ** argv, int priority, int (*entryPoint) (int, char **));
+int sys_new_process(char * name, int argc, char ** argv, int priority, int isForeground, int (*entryPoint) (int, char **));
 
 void sys_ps();
 
@@ -67,12 +68,13 @@ void sys_block(int pid);
 
 void sys_mem();
 
-sem * sys_semOpen(char * name);
+int * sys_sem_open(char * name);
 
-void sys_semPost(sem * sema);
+void sys_sem_post(int * sema);
 
-void sys_semWait(sem * sema);
+void sys_sem_wait(int * sema);
 
+void sys_sem_close(int * sema);
 
 
 #endif
