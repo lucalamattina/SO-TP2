@@ -3,6 +3,7 @@
 //
 
 #include <console.h>
+#include "../include/scheduler.h"
 
 #define MAX_BUFFER 100
 
@@ -34,7 +35,10 @@ void init_console(){
 }
 
 int isBackground(){
-  return current->priority < 0;
+  if(pList != NULL && pList->first != NULL){
+    return current->process->priority < 0;
+  }
+  return 1;
 }
 
 // Borrado de un caracter

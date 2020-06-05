@@ -1,8 +1,7 @@
 #include <process.h>
 
 processList * pList; //agregamos esto en el .h y .c creo que es lo que falla
-void addProcess(process * process);
-struct processNode * removeProcessList(processNode * node, process * process);
+
 
 void initList(void){
 	pList = pmalloc(sizeof(pList));
@@ -76,13 +75,6 @@ void removeProcess(int pid){
 }
 }
 
-processNode * getProcessNode(int pid){
-	processNode * aux = pList->first;
-  while(aux!=NULL && aux->process->pid != pid){
-    aux = aux->next;
-  }
-	return aux;
-}
 
 process * getProcess(int pid){
 	processNode * aux = pList->first;
