@@ -52,7 +52,7 @@ void * sys_malloc(size_t size);
 
 void sys_free(void * p);
 
-int sys_new_process(char * name, int argc, char ** argv, int priority, int (*entryPoint) (int, char **));
+int sys_new_process(char * name, int argc, char ** argv, int priority, int isForeground, int (*entryPoint) (int, char **));
 
 void sys_ps();
 

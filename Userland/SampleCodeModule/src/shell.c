@@ -29,6 +29,8 @@
 #define NICE 17
 #define BLOCK 18
 
+#define FOREGROUND 1
+#define BACKGROUND 0
 
 #define MAX_BLOCKS 128
 #define MAX_MEMORY 1024 //Should be around 80% of memory managed by the MM
@@ -108,8 +110,8 @@ void printminus(){
 
 void test_proc(){
 
-  int pid1 = sys_new_process("plus", 0, NULL, 10, printplus);
-  int pid2 = sys_new_process("minus", 0, NULL, 10, printminus);
+  int pid1 = sys_new_process("plus", 0, NULL, 10, FOREGROUND, printplus);
+  int pid2 = sys_new_process("minus", 0, NULL, 10, BACKGROUND, printminus);
 
   printf("%d\n", pid1);
   printf("%d\n", pid2);

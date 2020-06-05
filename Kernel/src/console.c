@@ -33,8 +33,15 @@ void init_console(){
     cursor.y = get_max_line()-1;
 }
 
+int isBackground(){
+  return current->priority < 0;
+}
+
 // Borrado de un caracter
 void backspace(){
+  if(isBackground()){
+    return;
+  }
   if(cursor.y == 0 && cursor.x == 0){
     return;
   } else if(cursor.x == 0){
@@ -54,7 +61,9 @@ void new_line(){
 
 // Imprime un string finalizado con 0 con Color especifico.
 void printWithColors(Color chosenForeground, Color chosenBackground, char * str, va_list list){
-
+    if(isBackground()){
+      return;
+    }
     int i = 0;
     while(str[i] != 0){
         if(str[i] == '%' && str[i-1] != '\\'){
@@ -101,6 +110,9 @@ void printWithColors(Color chosenForeground, Color chosenBackground, char * str,
 
 // Imprimir un solo caracter
 void print_char(char c){
+    if(isBackground()){
+      return;
+    }
     switch(c) {
         case '\n':
             new_line();
@@ -135,13 +147,18 @@ void print_char(char c){
 
 // Imprimir un string de N caracteres
 void print_N(const char * str, int length){
+    if(isBackground()){
+      return;
+    }
     for(int i = 0; i < length; i++){
         print_char(str[i]);
     }
 }
 
 void print(char * str, ...){
-
+    if(isBackground()){
+      return;
+    }
     va_list list;
     va_start(list, str);
     printWithColors(foreground, background, str, list);
@@ -149,6 +166,9 @@ void print(char * str, ...){
 }
 
 void printInteger(uint64_t dec){
+    if(isBackground()){
+      return;
+    }
     print("%d", dec);
 }
 
@@ -162,6 +182,9 @@ void printError(char * str, ...){
 
 //Obsolete: Mover una linea para arriba
 void move_line_up(unsigned int line){
+    if(isBackground()){
+      return;
+    }
     Color c = {0,0,0};
     Vector2 posGet = {0,line*CHAR_HEIGHT};
     Vector2 posDraw = {0,(line-1)*CHAR_HEIGHT};
@@ -181,12 +204,18 @@ void move_line_up(unsigned int line){
 }
 
 void move_all_up(){
+  if(isBackground()){
+    return;
+  }
   move_all_lines_up();
     clear_line(get_max_line()-1);
 }
 
 // Borrar linea
 void clear_line(unsigned int line){
+    if(isBackground()){
+      return;
+    }
     Vector2 posDraw = {0,line*CHAR_HEIGHT};
     for(int j = 0; j < CHAR_HEIGHT; j++){
         for (int i = 0; i < getResX(); ++i)
@@ -201,6 +230,9 @@ void clear_line(unsigned int line){
 
 // Limpiar pantalla
 void clear_console(){
+    if(isBackground()){
+      return;
+    }
     Vector2 size = {getResX(), getResY()};
     draw_rect(ZeroVector, size, background);
     cursor.x = 0;

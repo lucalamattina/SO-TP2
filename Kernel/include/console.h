@@ -10,6 +10,7 @@
 #include <strings.h>
 #include <stdarg.h>
 #include <videoDriver.h>
+#include <scheduler.h>
 
 void init_console();
 

@@ -45,7 +45,7 @@ void scheduler(uint64_t stackPointer){
     }
   } while(current->process->state != READY);
   setState(current->process->pid, RUNNING);
-  quantum = current->process->priority;
+  quantum = current->process->priority < 0 ? current->process->priority * (-1) : current->process->priority;
   _runProcess(current->process->stackPointer);
 }
 

@@ -63,8 +63,9 @@ void sys_free(void * p){
 	_int80((uint64_t)FREE, (uint64_t)p,0,0,0,0);
 }
 
-int sys_new_process(char * name, int argc, char ** argv, int priority, int (*entryPoint) (int, char **)){
-	return (int)_int80((uint64_t)NEWPROC, name, argc, argv, priority, entryPoint);
+int sys_new_process(char * name, int argc, char ** argv, int priority, int isForeground, int (*entryPoint) (int, char **)){
+	int priorityAux = isForeground == 0 ? (-1) * priority : priority;
+	return (int)_int80((uint64_t)NEWPROC, name, argc, argv, priorityAux, entryPoint);
 }
 
 void sys_ps(void){
