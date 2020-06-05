@@ -78,7 +78,7 @@ void semWait(int * semid){
     }
 }
 
-void sem(){
+void printsem(){
 	print("---------------------------\n");
 	for(i=0;i<MAX_SEM_COUNT;i++){
         if(semList[i]!=NULL){
