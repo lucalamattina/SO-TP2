@@ -4,7 +4,7 @@
 #define MAX_SEM_COUNT 30
 #define MAX_PROCESS_COUNT 20
 
-#include <process.h>
+#include <scheduler.h>
 #include <lib.h>
 #include <stdlib.h>
 #include <stddef.h>
