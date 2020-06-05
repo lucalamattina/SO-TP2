@@ -87,8 +87,8 @@ void sys_mem(){
 	_int80((uint64_t)MEM, 0, 0, 0, 0, 0);
 }
 
-void sys_semOpen(char * name){
-	_int80((uint64_t)OPEN, name, 0, 0, 0, 0);
+sem * sys_semOpen(char * name){
+	return (sem *)_int80((uint64_t)OPEN, name, 0, 0, 0, 0);
 }
 
 void sys_semPost(sem * sema){

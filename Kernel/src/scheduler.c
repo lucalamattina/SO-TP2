@@ -1,4 +1,4 @@
-#include "scheduler.h"
+#include <scheduler.h>
 
 static int quantum;
 processNode * current;
@@ -58,8 +58,4 @@ void wrapper(int (*entryPoint)(int, char**), int argc, char **argv){
   entryPoint(argc, argv);
   current->process->state = DEAD;
   _interrupt();
-}
-
-process * getCurrentProcess(){
-  return current->process;
 }

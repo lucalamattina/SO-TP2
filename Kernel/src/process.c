@@ -76,13 +76,6 @@ void removeProcess(int pid){
 }
 }
 
-processNode * getProcessNode(int pid){
-	processNode * aux = pList->first;
-  while(aux!=NULL && aux->process->pid != pid){
-    aux = aux->next;
-  }
-	return aux;
-}
 
 process * getProcess(int pid){
 	processNode * aux = pList->first;
