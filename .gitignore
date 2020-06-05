@@ -54,3 +54,13 @@ Module.symvers
 Mkfile.old
 dkms.conf
 .vscode/settings.json
+Image/x64BareBonesImage.img
+Image/x64BareBonesImage.qcow2
+Image/x64BareBonesImage.qcow2
+Image/packedKernel.bin
+Image/x64BareBonesImage.img
+Image/x64BareBonesImage.qcow2
+Image/x64BareBonesImage.vmdk
+Kernel/kernel.bin
+Userland/0000-sampleCodeModule.bin
+Userland/0000-sampleCodeModule.elf

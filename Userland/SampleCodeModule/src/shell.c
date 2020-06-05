@@ -25,9 +25,11 @@
 #define TESTPROC 13
 #define PS 14
 #define MEM 15
-#define KILL 16
-#define NICE 17
-#define BLOCK 18
+#define TESTSYNC 16
+#define TESTNOSYNC 17
+#define KILL 18
+#define NICE 19
+#define BLOCK 20
 
 #define FOREGROUND 1
 #define BACKGROUND 0
@@ -41,8 +43,8 @@ typedef struct MM_rq{
 }mm_rq;
 
 //Todos los comandos disponibles
-const char *commands[] = {"help", "shutdown", "invalid", "time", "beep", "sleep", "date", "clear", "div", "credits", "starwars", "mario", "testmm", "testproc", "ps", "mem", "kill", "nice", "block"};
-const int commandCount = 16;
+const char *commands[] = {"help", "shutdown", "invalid", "time", "beep", "sleep", "date", "clear", "div", "credits", "starwars", "mario", "testmm", "testproc", "ps", "mem", "testsync", "testnosync", "kill", "nice", "block"};
+const int commandCount = 18;
 int pid;
 int priority;
 
@@ -54,6 +56,128 @@ void make_starwars(void);
 void make_mario(void);
 
 int * sema;
+
+//------------------------------------------------------------------------------------------------------
+
+uint64_t my_create_process(char * name, int(*entryPoint)(int,char**)){
+  return sys_new_process(name, 0, NULL, 1, FOREGROUND, entryPoint);
+}
+
+uint64_t * my_sem_open(char *sem_id){
+  return sys_sem_open(sem_id);
+}
+
+void my_sem_wait(int * sem_id){
+ return sys_sem_wait(sem_id);
+}
+
+void my_sem_post(char *sem_id){
+  return sys_sem_post(sem_id);
+}
+
+void my_sem_close(char *sem_id){
+  return sys_sem_close(sem_id);
+}
+
+#define N 100000000
+#define SEM_ID "sem"
+#define TOTAL_PAIR_PROCESSES 2
+
+uint64_t global;  //shared memory
+
+void slowInc(uint64_t *p, uint64_t inc){
+  uint64_t aux = *p;
+  aux += inc;
+  *p = aux;
+}
+
+void my_process_inc(){
+  uint64_t i;
+
+  if (!my_sem_open(SEM_ID)){
+    printf("ERROR OPENING SEM\n");
+    return;
+  }
+  
+  for (i = 0; i < N; i++){
+    my_sem_wait(sema);
+    slowInc(&global, 1);
+    my_sem_post(sema);
+  }
+
+  my_sem_close(sema);
+  
+  printf("Final value: %d\n", global);
+}
+
+void my_process_dec(){
+  uint64_t i;
+
+  if (!my_sem_open(SEM_ID)){
+    printf("ERROR OPENING SEM\n");
+    return;
+  }
+  
+  for (i = 0; i < N; i++){
+    my_sem_wait(sema);
+    slowInc(&global, -1);
+    my_sem_post(sema);
+  }
+
+  my_sem_close(sema);
+
+  printf("Final value: %d\n", global);
+}
+
+void test_sync(){
+  uint64_t i;
+
+  global = 0;
+
+  printf("CREATING PROCESSES...\n");
+
+  for(i = 0; i < TOTAL_PAIR_PROCESSES; i++){
+    my_create_process("my_process_inc", (uint64_t)my_process_inc);
+    my_create_process("my_process_dec", (uint64_t)my_process_dec);
+  }
+  
+  // The last one should print 0
+}
+
+void my_process_inc_no_sem(){
+  uint64_t i;
+  for (i = 0; i < N; i++){
+    slowInc(&global, 1);
+  }
+
+  printf("Final value: %d\n", global);
+}
+
+void my_process_dec_no_sem(){
+  uint64_t i;
+  for (i = 0; i < N; i++){
+    slowInc(&global, -1);
+  }
+
+  printf("Final value: %d\n", global);
+}
+
+void test_no_sync(){
+  uint64_t i;
+
+  global = 0;
+
+  printf("CREATING PROCESSES...\n");
+
+  for(i = 0; i < TOTAL_PAIR_PROCESSES; i++){
+    my_create_process("my_process_inc_no_sem", (uint64_t)my_process_inc_no_sem);
+    my_create_process("my_process_dec_no_sem", (uint64_t)my_process_inc_no_sem);
+  }
+
+  // The last one should not print 0
+}
+
+//----------------------------------------------------------------------------------------------------------------------------
 
 void test_mm(){
   mm_rq mm_rqs[MAX_BLOCKS];
@@ -365,6 +489,12 @@ void handle_command(int cmd)
   case MEM:
     mem();
     break;
+  case TESTSYNC:
+	test_sync();
+	break;
+  case TESTNOSYNC:
+	test_no_sync();
+	break;
   case KILL:
     kill(pid);
     break;
@@ -421,6 +551,8 @@ void display_help(void)
   print("testproc - Tests processes\n");
   print("ps - Prints basic information abouth each process\n");
   print("mem - Prints memory state\n");
+  print("testsync - Tests semaphore sync\n");
+  print("testnosync - Tests semaphora no sync\n");
   print("kill - Kill a process given it's pid\n");
   print("nice - Changes a process' priority given it's pid and new priority\n");
   print("block - Blocks a process given it's pid\n");
