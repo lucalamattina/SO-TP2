@@ -44,6 +44,7 @@ void semClose(sem * semaforo){
     for(int i=0; i<MAX_SEM_COUNT; i++){
         if(semList[i] != NULL && semList[i]==semaforo){
             pfree(semList[i]);
+            semList[i]=NULL;
         }
     }
 }
@@ -73,4 +74,21 @@ void semWait(sem* semaforo){
         semaforo->processList[pos] = current->process->pid;
         setState(semaforo->processList[pos], BLOCKED);
     }
+}
+
+void sem(){
+	print("---------------------------\n");
+	for(i=0;i<MAX_SEM_COUNT;i++){
+        if(semList[i]!=NULL){
+		print("Name: %s \n", semList[i]->name);
+		print("PID: %d \n", semList[i]->state);
+        print("Blocked porcesses: { \n";
+		for(int j = 0; j != MAX_PROCESS_COUNT; j++){
+            if(semList[i]->processList[j]!=-1){
+                print(" PID = %d \n", semList[i]->processList[j]);
+            }
+        }
+        print("}\n");
+		print("---------------------------\n");
+	}
 }

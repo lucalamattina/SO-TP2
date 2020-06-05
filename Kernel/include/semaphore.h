@@ -9,7 +9,6 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <MemoryManager.h>
-#include <scheduler.h>
 
 
 typedef struct sem{

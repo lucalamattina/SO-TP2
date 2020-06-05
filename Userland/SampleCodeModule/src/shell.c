@@ -110,7 +110,7 @@ void test_proc(){
 
   int pid1 = sys_new_process("p1", 0, NULL, 10, p1);
   int pid2 = sys_new_process("p2", 0, NULL, 10, p2);
-  sem* sema = semOpen("sema");
+  sem * sema = semOpen("sema");
 }
 
 void ps(){
