@@ -42,6 +42,12 @@ void handle_sys_nice(int pid, int priority);
 
 void handle_sys_mem();
 
+sem * handle_sys_semOpen(char * name);
+
+void handle_sys_semPost(sem * sema);
+
+void handle_sys_semWait(sem * sema);
+
 //Handler de la llamada a la int 80
 uint64_t handleSyscall(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, uint64_t r8, uint64_t r9){
     switch(rdi){
@@ -98,6 +104,15 @@ uint64_t handleSyscall(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, u
         break;
       case MEM:
         handle_sys_mem();
+        break;
+      case OPEN:
+        handle_sys_semOpen(rsi);
+        break;
+      case POST:
+        handle_sys_semPost(rsi);
+        break;
+      case WAIT:
+        handle_sys_semWait(rsi);
         break;
 
 	}
@@ -187,4 +202,16 @@ void handle_sys_block(int pid){
 
 void handle_sys_mem(){
   mem();
+}
+
+sem * handle_sys_semOpen(char * name){
+  return semOpen(name);
+}
+
+void handle_sys_semPost(sem * sema){
+  semPost(sema);
+}
+
+void handle_sys_semWait(sem * sema){
+  semWait(sema);
 }

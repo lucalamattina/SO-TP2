@@ -92,29 +92,35 @@ void test_mm(){
   }
 }
 
-void printplus(){
-    int i = 0;
-  while(1){
-    printf("%d\n", i);
-    i++;
-  }
+void p1(){
+	semWait(sema);
+	printf("primero\n");
+	sys_sleep(5000);
+	sys_ps(void);
+	semPost(sema);
 }
 
-void printminus(){
-
-
-  while(1){
-    print("-\n");
-  }
+void p2(){
+	semWait(sema);
+	printf("segundo\n");
+	sys_sleep(5000);
+	sys_ps(void);
+	semPost(sema);
 }
 
 void test_proc(){
 
+<<<<<<< HEAD
   int pid1 = sys_new_process("plus", 0, NULL, 10, FOREGROUND, printplus);
   int pid2 = sys_new_process("minus", 0, NULL, 10, BACKGROUND, printminus);
 
   printf("%d\n", pid1);
   printf("%d\n", pid2);
+=======
+  int pid1 = sys_new_process("p1", 0, NULL, 10, p1);
+  int pid2 = sys_new_process("p2", 0, NULL, 10, p2);
+  sem* sema = semOpen("sema");
+>>>>>>> luca
 }
 
 void ps(){

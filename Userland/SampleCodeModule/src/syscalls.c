@@ -87,3 +87,15 @@ void sys_block(int pid){
 void sys_mem(){
 	_int80((uint64_t)MEM, 0, 0, 0, 0, 0);
 }
+
+sem * sys_semOpen(char * name){
+	return (sem *)_int80((uint64_t)OPEN, name, 0, 0, 0, 0);
+}
+
+void sys_semPost(sem * sema){
+	_int80((uint64_t)POST, sema, 0, 0, 0, 0);
+}
+
+void sys_semWait(sem * sema){
+	_int80((uint64_t)WAIT, sema, 0, 0, 0, 0);
+}
