@@ -37,6 +37,8 @@ int strcmp(const char * stra, const char * strb);
 
 int strlen(const char * str);
 
+void strncpy(char * dst, char * src, int n);
+
 void strcpy(char * dst, char * src);
 
 void makeSound(int freq, int time);

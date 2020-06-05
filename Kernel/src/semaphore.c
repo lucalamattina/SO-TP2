@@ -26,7 +26,7 @@ int getAvailableProcessPos(sem* semaforo){
     return -1;
 }
 
-sem * semOpen(char* name){
+int * semOpen(char * name){
     int pos = getAvailableSemPos();
     if(pos == -1){
         return NULL;
@@ -34,21 +34,22 @@ sem * semOpen(char* name){
     semList[pos]=pmalloc(sizeof(sem));
     semList[pos]->name=name;
     semList[pos]->state=1;
+    semList[pos]->id = pos;
     for(int i=0; i<MAX_PROCESS_COUNT; i++){
         semList[pos]->processList[i] = -1;
     }
-    return semList[pos];
+    return &semList[pos]->id;
 }
 
-void semClose(sem * semaforo){
-    for(int i=0; i<MAX_SEM_COUNT; i++){
-        if(semList[i] != NULL && semList[i]==semaforo){
-            pfree(semList[i]);
-        }
-    }
+void semClose(int * semid){
+    sem * semaforo = semList[*semid];
+    pfree(semaforo);
+    semList[*semid] = NULL;
+
 }
 
-void semPost(sem* semaforo){
+void semPost(int * semid){
+    sem * semaforo = semList[*semid];
     (semaforo->state)+=1;
     int i;
 
@@ -60,7 +61,8 @@ void semPost(sem* semaforo){
     }
 }
 
-void semWait(sem* semaforo){
+void semWait(int * semid){
+    sem * semaforo = semList[*semid];
     if(semaforo->state>0){
         semaforo->state-=1;
         return;
@@ -72,5 +74,6 @@ void semWait(sem* semaforo){
         }
         semaforo->processList[pos] = current->process->pid;
         setState(semaforo->processList[pos], BLOCKED);
+        _interrupt();
     }
 }

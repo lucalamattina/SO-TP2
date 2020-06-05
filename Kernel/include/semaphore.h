@@ -16,6 +16,7 @@ typedef struct sem{
     uint64_t state;
     char* name;
     int processList[MAX_PROCESS_COUNT];
+    int * id;
 }sem;
 
 extern sem* semList[MAX_SEM_COUNT];
@@ -23,10 +24,10 @@ extern sem* semList[MAX_SEM_COUNT];
 void initializeSemList();
 int getAvailableSemPos();
 int getAvailableProcessPos(sem* semaforo);
-sem * semOpen(char* name);
-void semClose(sem * semaforo);
-void semPost(sem* semaforo);
-void semWait(sem* semaforo);
+int * semOpen(char* name);
+void semClose(int * semid);
+void semPost(int * semid);
+void semWait(int * semid);
 
 
 #endif
