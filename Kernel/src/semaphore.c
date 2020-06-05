@@ -80,11 +80,11 @@ void semWait(int * semid){
 
 void printsem(){
 	print("---------------------------\n");
-	for(i=0;i<MAX_SEM_COUNT;i++){
+	for(int i=0;i<MAX_SEM_COUNT;i++){
         if(semList[i]!=NULL){
 		print("Name: %s \n", semList[i]->name);
 		print("PID: %d \n", semList[i]->state);
-        print("Blocked porcesses: { \n";
+        print("Blocked porcesses: { \n");
 		for(int j = 0; j != MAX_PROCESS_COUNT; j++){
             if(semList[i]->processList[j]!=-1){
                 print(" PID = %d \n", semList[i]->processList[j]);
@@ -93,4 +93,5 @@ void printsem(){
         print("}\n");
 		print("---------------------------\n");
 	}
+}
 }

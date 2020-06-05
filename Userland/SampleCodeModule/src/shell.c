@@ -71,11 +71,11 @@ void my_sem_wait(int * sem_id){
  return sys_sem_wait(sem_id);
 }
 
-void my_sem_post(char *sem_id){
+void my_sem_post(int *sem_id){
   return sys_sem_post(sem_id);
 }
 
-void my_sem_close(char *sem_id){
+void my_sem_close(int *sem_id){
   return sys_sem_close(sem_id);
 }
 
