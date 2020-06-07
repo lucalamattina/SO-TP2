@@ -8,9 +8,12 @@ void initializeSemList(){
     }
 }
 
-int getAvailableSemPos(){
+int getAvailableSemPos(char * name){
     for(int i=0; i<MAX_SEM_COUNT;i++){
-        if(semList[i]==NULL){
+        if(semList[i] != NULL && strcmp(semList[i]->name, name) == 0){
+          return i;
+        }
+        else if(semList[i]==NULL){
             return i;
         }
     }
@@ -27,7 +30,7 @@ int getAvailableProcessPos(sem* semaforo){
 }
 
 int * semOpen(char * name){
-    int pos = getAvailableSemPos();
+    int pos = getAvailableSemPos(name);
     if(pos == -1){
         return NULL;
     }
@@ -42,10 +45,11 @@ int * semOpen(char * name){
 }
 
 void semClose(int * semid){
-    sem * semaforo = semList[*semid];
-    pfree(semaforo);
+  for(int i=0; i<MAX_PROCESS_COUNT; i++){
+      semList[*semid]->processList[i] = -1;
+  }
+    pfree(semList[*semid]);
     semList[*semid] = NULL;
-
 }
 
 void semPost(int * semid){
@@ -72,19 +76,24 @@ void semWait(int * semid){
         if(pos == -1){
             return;
         }
-        semaforo->processList[pos] = current->process->pid;
-        setState(semaforo->processList[pos], BLOCKED);
+
+        if(current != NULL && current->process->state != DEAD && current->process->state != BLOCKED){
+          setState(semaforo->processList[pos], BLOCKED);
+          semaforo->processList[pos] = current->process->pid;
+
+        }
         _interrupt();
     }
 }
 
-void sem(){
+void printsem(){
 	print("---------------------------\n");
-	for(i=0;i<MAX_SEM_COUNT;i++){
-        if(semList[i]!=NULL){
+	for(int i=0;i<MAX_SEM_COUNT;i++){
+    if(semList[i]!=NULL){
 		print("Name: %s \n", semList[i]->name);
-		print("PID: %d \n", semList[i]->state);
-        print("Blocked porcesses: { \n";
+		print("State: %d \n", semList[i]->state);
+    print("Id: %d \n", semList[i]->id);
+    print("Blocked porcesses: { \n");
 		for(int j = 0; j != MAX_PROCESS_COUNT; j++){
             if(semList[i]->processList[j]!=-1){
                 print(" PID = %d \n", semList[i]->processList[j]);
@@ -93,4 +102,5 @@ void sem(){
         print("}\n");
 		print("---------------------------\n");
 	}
+  }
 }

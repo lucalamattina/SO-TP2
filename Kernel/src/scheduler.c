@@ -29,20 +29,14 @@ void scheduler(uint64_t stackPointer){
     setState(current->process->pid, READY);
   }
 
-  // while(current->process->state != READY){
-  //     if (current->next == NULL) {
-  //       current = pList->first;
-  //     }else{
-  //       current = current->next;
-  //     }
-  // }
   do {
-    if(current->next == NULL){
-      current = pList->first;
-    }
-    else{
-      current = current->next;
-    }
+      if(current->next == NULL){
+        current = pList->first;
+      }
+      else{
+         current = current->next;
+      }
+    
   } while(current->process->state != READY);
   setState(current->process->pid, RUNNING);
   quantum = current->process->priority < 0 ? current->process->priority * (-1) : current->process->priority;

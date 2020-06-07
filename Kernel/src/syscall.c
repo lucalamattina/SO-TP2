@@ -50,6 +50,8 @@ void handle_sys_sem_wait(int * sema);
 
 void handle_sys_sem_close(int * sema);
 
+void hande_sys_print_sem();
+
 //Handler de la llamada a la int 80
 uint64_t handleSyscall(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, uint64_t r8, uint64_t r9){
     switch(rdi){
@@ -119,6 +121,9 @@ uint64_t handleSyscall(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, u
       case SEMCLOSE:
         handle_sys_sem_close(rsi);
         break;
+      case PRINTSEM:
+        handle_sys_print_sem();
+        break;
 
 	}
 	return 0;
@@ -144,9 +149,11 @@ void handle_sys_clear_console(void){
 //El fd es el File Descriptor, no lo utilizamos porque no es necesario en nuestro caso
 //Esta para que se pueda implementar en el futuro
 void handle_sys_read(int fd, char * buf, int length){
-	for (int i = 0; i < length; i++){
-		*(buf + i) = getChar();
-	}
+  if(fd == 0){
+  	for (int i = 0; i < length; i++){
+  		*(buf + i) = getChar();
+  	}
+  }
 }
 
 //Handler para la system SLEEP
@@ -223,4 +230,8 @@ void handle_sys_sem_wait(int * sema){
 
 void handle_sys_sem_close(int * sema){
   semClose(sema);
+}
+
+void handle_sys_print_sem(){
+  printsem();
 }

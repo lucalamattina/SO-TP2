@@ -27,9 +27,10 @@
 #define MEM 15
 #define TESTSYNC 16
 #define TESTNOSYNC 17
-#define KILL 18
-#define NICE 19
-#define BLOCK 20
+#define PRINTSEM 18
+#define KILL 19
+#define NICE 20
+#define BLOCK 21
 
 #define FOREGROUND 1
 #define BACKGROUND 0
@@ -43,8 +44,8 @@ typedef struct MM_rq{
 }mm_rq;
 
 //Todos los comandos disponibles
-const char *commands[] = {"help", "shutdown", "invalid", "time", "beep", "sleep", "date", "clear", "div", "credits", "starwars", "mario", "testmm", "testproc", "ps", "mem", "testsync", "testnosync", "kill", "nice", "block"};
-const int commandCount = 18;
+const char *commands[] = {"help", "shutdown", "invalid", "time", "beep", "sleep", "date", "clear", "div", "credits", "starwars", "mario", "testmm", "testproc", "ps", "mem", "testsync", "testnosync", "sem", "kill", "nice", "block"};
+const int commandCount = 19;
 int pid;
 int priority;
 
@@ -57,30 +58,30 @@ void make_mario(void);
 
 int * sema;
 
-//------------------------------------------------------------------------------------------------------
-
+//----------------------------------------------------------------------------------------------------------------------------
 uint64_t my_create_process(char * name, int(*entryPoint)(int,char**)){
-  return sys_new_process(name, 0, NULL, 1, FOREGROUND, entryPoint);
+  return sys_new_process(name, 0, NULL, 10, FOREGROUND, entryPoint);
 }
+
 
 uint64_t * my_sem_open(char *sem_id){
   return sys_sem_open(sem_id);
 }
 
 void my_sem_wait(int * sem_id){
- return sys_sem_wait(sem_id);
+ sys_sem_wait(sem_id);
 }
 
-void my_sem_post(char *sem_id){
-  return sys_sem_post(sem_id);
+void my_sem_post(int * sem_id){
+  sys_sem_post(sem_id);
 }
 
-void my_sem_close(char *sem_id){
-  return sys_sem_close(sem_id);
+void my_sem_close(int * sem_id){
+  sys_sem_close(sem_id);
 }
 
-#define N 100000000
-#define SEM_ID "sem"
+#define N 1000
+#define SEM_ID "semaforillo"
 #define TOTAL_PAIR_PROCESSES 2
 
 uint64_t global;  //shared memory
@@ -93,12 +94,7 @@ void slowInc(uint64_t *p, uint64_t inc){
 
 void my_process_inc(){
   uint64_t i;
-
-  if (!my_sem_open(SEM_ID)){
-    printf("ERROR OPENING SEM\n");
-    return;
-  }
-  
+  sema = my_sem_open(SEM_ID);
   for (i = 0; i < N; i++){
     my_sem_wait(sema);
     slowInc(&global, 1);
@@ -106,27 +102,21 @@ void my_process_inc(){
   }
 
   my_sem_close(sema);
-  
   printf("Final value: %d\n", global);
+
 }
 
 void my_process_dec(){
   uint64_t i;
-
-  if (!my_sem_open(SEM_ID)){
-    printf("ERROR OPENING SEM\n");
-    return;
-  }
-  
+  sema = my_sem_open(SEM_ID);
   for (i = 0; i < N; i++){
     my_sem_wait(sema);
     slowInc(&global, -1);
     my_sem_post(sema);
   }
-
   my_sem_close(sema);
-
   printf("Final value: %d\n", global);
+
 }
 
 void test_sync(){
@@ -140,7 +130,8 @@ void test_sync(){
     my_create_process("my_process_inc", (uint64_t)my_process_inc);
     my_create_process("my_process_dec", (uint64_t)my_process_dec);
   }
-  
+
+
   // The last one should print 0
 }
 
@@ -217,28 +208,22 @@ void test_mm(){
 }
 
 void p1(){
-    // printf("chau\n");
-  	sys_sem_wait(sema);
-  	for(int x = 0; x < 100; x++){
-      printf("1\n");
-    }
-  	sys_sem_post(sema);
+  while(1){
+    print("1\n");
+  }
 
 }
 
 void p2(){
-  	sys_sem_wait(sema);
-    for(int y = 0; y < 100; y++){
-      printf("2\n");
+  	while(1){
+      print("2\n");
     }
-  	sys_sem_post(sema);
 }
 
 void test_proc(){
-  sema = sys_sem_open("sema");
-  int pid1 = sys_new_process("p1", 0, NULL, 1, FOREGROUND, p1);
-  // printf("hola\n");
-  int pid2 = sys_new_process("p2", 0, NULL, 1, FOREGROUND, p2);
+  // int pid1 = sys_new_process("p1", 0, NULL, 1, FOREGROUND, p1);
+  // // printf("hola\n");
+  // int pid2 = sys_new_process("p2", 0, NULL, 1, FOREGROUND, p2);
 
 }
 
@@ -248,6 +233,10 @@ void ps(){
 
 void mem(){
   sys_mem();
+}
+
+void printsem(){
+  sys_print_sem();
 }
 
 void kill(int killpid){
@@ -359,8 +348,6 @@ int getCommand(char *cmd)
   if(!strncmp(cmd, "kill ", 4)){
     char * cmdaux = cmd+5;
     int j = 0;
-
-    printf("%s", cmdaux);
     while(*cmdaux != 0){
       if(!isNumeric(*cmdaux)){
         return result;
@@ -379,7 +366,6 @@ int getCommand(char *cmd)
     char * cmdaux2 = cmd+6;
     int a = 0;
 
-    printf("%c", *cmdaux2);
     while(*cmdaux2 != 0){
       if(!isNumeric(*cmdaux2)){
         return result;
@@ -391,7 +377,6 @@ int getCommand(char *cmd)
     if(pid == -1){
       return result;
     }
-    printf("%d\n", pid);
     return BLOCK;
   }
 
@@ -406,7 +391,6 @@ int getCommand(char *cmd)
       b++;
     }
     pid = atoi(cmd + 5,b);
-    printf("%d\n", pid);
     if(pid == -1){
       return result;
     }
@@ -490,11 +474,14 @@ void handle_command(int cmd)
     mem();
     break;
   case TESTSYNC:
-	test_sync();
-	break;
+	  test_sync();
+	  break;
   case TESTNOSYNC:
-	test_no_sync();
-	break;
+	  test_no_sync();
+	  break;
+  case PRINTSEM:
+    printsem();
+    break;
   case KILL:
     kill(pid);
     break;
@@ -551,6 +538,7 @@ void display_help(void)
   print("testproc - Tests processes\n");
   print("ps - Prints basic information abouth each process\n");
   print("mem - Prints memory state\n");
+  print("sem - Prints semaphores\n");
   print("testsync - Tests semaphore sync\n");
   print("testnosync - Tests semaphora no sync\n");
   print("kill - Kill a process given it's pid\n");
