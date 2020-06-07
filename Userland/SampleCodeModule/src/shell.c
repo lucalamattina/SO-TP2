@@ -208,9 +208,7 @@ void test_mm(){
 }
 
 void p1(){
-  while(1){
-    print("1\n");
-  }
+  sys_write()
 
 }
 
@@ -221,9 +219,13 @@ void p2(){
 }
 
 void test_proc(){
-  // int pid1 = sys_new_process("p1", 0, NULL, 1, FOREGROUND, p1);
-  // // printf("hola\n");
-  // int pid2 = sys_new_process("p2", 0, NULL, 1, FOREGROUND, p2);
+  int fd = sys_open_pipe("holis");
+  int pid1 = sys_new_process("p1", 0, NULL, 1, FOREGROUND, p1);
+  sys_set_fd(pid1, 1, fd);
+  int pid2 = sys_new_process("p2", 0, NULL, 1, FOREGROUND, p2);
+  sys_set_fd(pid2, 0, fd);
+
+
 
 }
 

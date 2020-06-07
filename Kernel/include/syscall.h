@@ -36,6 +36,10 @@
 #define SEMWAIT 22
 #define SEMCLOSE 23
 #define PRINTSEM 24
+#define OPENPIPE 25
+#define PRINTPIPES 26
+#define SETFD 27
+#define GETFD 28
 
 uint64_t handleSyscall(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, uint64_t r8, uint64_t r9);
 

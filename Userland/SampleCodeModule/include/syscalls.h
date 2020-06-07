@@ -30,6 +30,10 @@
 #define SEMWAIT 22
 #define SEMCLOSE 23
 #define PRINTSEM 24
+#define OPENPIPE 25
+#define PRINTPIPES 26
+#define SETFD 27
+#define GETFD 28
 
 void sys_write(int fd, const char *buf, int count);
 
@@ -78,5 +82,13 @@ void sys_sem_wait(int * sema);
 void sys_sem_close(int * sema);
 
 void sys_print_sem();
+
+int sys_open_pipe(char * name);
+
+void sys_print_pipes();
+
+void sys_set_fd(int pid, int fdToModify, int newFd);
+
+int sys_get_fd(int pid, int fdPos);
 
 #endif

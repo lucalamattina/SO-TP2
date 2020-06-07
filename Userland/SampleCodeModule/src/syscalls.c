@@ -107,3 +107,19 @@ void sys_sem_close(int * sema){
 void sys_print_sem(){
 	_int80((uint64_t)PRINTSEM, 0, 0, 0, 0, 0);
 }
+
+int sys_open_pipe(char * name){
+	return (int)_int80((uint64_t)OPENPIPE, (uint64_t)name, 0, 0, 0, 0);
+}
+
+void sys_print_pipes(){
+	_int80((uint64_t)PRINTPIPES, 0, 0, 0, 0, 0);
+}
+
+void sys_set_fd(int pid, int fdToModify, int newFd){
+	_int80((uint64_t)SETFD, (uint64_t)pid, (uint64_t)fdToModify, (uint64_t)newFd, 0, 0);
+}
+
+int sys_get_fd(int pid, int fdPos){
+	return (int)_int80((uint64_t)SETFD, (uint64_t)pid, (uint64_t)fdPos, 0, 0, 0);
+}

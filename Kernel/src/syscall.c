@@ -4,6 +4,7 @@
 #include <console.h>
 #include <scheduler.h>
 #include <semaphore.h>
+#include <pipe.h>
 
 extern void hang();
 extern void over_clock(int rate);
@@ -51,6 +52,14 @@ void handle_sys_sem_wait(int * sema);
 void handle_sys_sem_close(int * sema);
 
 void hande_sys_print_sem();
+
+int handle_sys_open_pipe(char * name);
+
+void handle_sys_print_pipes();
+
+void handle_sys_set_fd(int pid, int fdToModify, int newFd);
+
+int handle_sys_get_fd(int pid, int fdPos);
 
 //Handler de la llamada a la int 80
 uint64_t handleSyscall(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, uint64_t r8, uint64_t r9){
@@ -124,6 +133,18 @@ uint64_t handleSyscall(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, u
       case PRINTSEM:
         handle_sys_print_sem();
         break;
+      case OPENPIPE:
+        return handle_sys_open_pipe(rsi);
+        break;
+      case PRINTPIPES:
+        handle_sys_print_pipes();
+        break;
+      case SETFD:
+        handle_sys_set_fd(rsi, rdx, rcx);
+        break;
+      case GETFD:
+        return handle_sys_get_fd(rsi, rdx);
+        break;
 
 	}
 	return 0;
@@ -131,7 +152,8 @@ uint64_t handleSyscall(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, u
 
 //Handler para la system write
 void handle_sys_write(int fd, const char * buf, int length){
-    print_N(buf, length);
+    if(fd == 1){print_N(buf, length);}
+    else{writeToPipe(fd-2, buf);}
 }
 
 //Handler para la system get ticks
@@ -153,6 +175,8 @@ void handle_sys_read(int fd, char * buf, int length){
   	for (int i = 0; i < length; i++){
   		*(buf + i) = getChar();
   	}
+  }else{
+    readFromPipe(fd-2, buf);
   }
 }
 
@@ -234,4 +258,20 @@ void handle_sys_sem_close(int * sema){
 
 void handle_sys_print_sem(){
   printsem();
+}
+
+int handle_sys_open_pipe(char * name){
+  return newPipe(name);
+}
+
+void handle_sys_print_pipes(){
+  printPipes();
+}
+
+void handle_sys_set_fd(int pid, int fdToModify, int newFd){
+  setFd(pid, fdToModify, newFd);
+}
+
+int handle_sys_get_fd(int pid, int fdPos){
+  return getFd(pid, fdPos);
 }

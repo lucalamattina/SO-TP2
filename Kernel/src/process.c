@@ -164,3 +164,24 @@ void nice(int pid, int priority){
 		}
 	}
 }
+
+void setFd(int pid, int fdToModify, int newFd){
+	processNode * aux = pList->first;
+	while(aux != NULL && pid != aux->process->pid){
+		aux = aux->next;
+	}
+	if (aux != NULL && pid == aux->process->pid) {
+		aux->process->fd[fdToModify] = newFd;
+	}
+}
+
+int getFd(int pid, int fdPos){
+	processNode * aux = pList->first;
+	while(aux != NULL && pid != aux->process->pid){
+		aux = aux->next;
+	}
+	if (aux != NULL && pid == aux->process->pid) {
+		return aux->process->fd[fdPos];
+	}
+	return -1;
+}
