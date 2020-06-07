@@ -51,6 +51,8 @@ void handle_sys_sem_wait(int * sema);
 
 void handle_sys_sem_close(int * sema);
 
+int handle_sys_get_curr_pid();
+
 void hande_sys_print_sem();
 
 int handle_sys_open_pipe(char * name);
@@ -144,6 +146,9 @@ uint64_t handleSyscall(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, u
         break;
       case GETFD:
         return handle_sys_get_fd(rsi, rdx);
+        break;
+      case GETCURRPID:
+        return handle_sys_get_curr_pid();
         break;
 
 	}
@@ -274,4 +279,8 @@ void handle_sys_set_fd(int pid, int fdToModify, int newFd){
 
 int handle_sys_get_fd(int pid, int fdPos){
   return getFd(pid, fdPos);
+}
+
+int handle_sys_get_curr_pid(){
+  return getCurrentPid();
 }

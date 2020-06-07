@@ -34,6 +34,7 @@
 #define PRINTPIPES 26
 #define SETFD 27
 #define GETFD 28
+#define GETCURRPID 29
 
 void sys_write(int fd, const char *buf, int count);
 
@@ -80,6 +81,8 @@ void sys_sem_post(int * sema);
 void sys_sem_wait(int * sema);
 
 void sys_sem_close(int * sema);
+
+int sys_get_curr_pid();
 
 void sys_print_sem();
 
