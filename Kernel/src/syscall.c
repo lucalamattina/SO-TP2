@@ -50,6 +50,8 @@ void handle_sys_sem_wait(int * sema);
 
 void handle_sys_sem_close(int * sema);
 
+int handle_sys_get_curr_pid();
+
 //Handler de la llamada a la int 80
 uint64_t handleSyscall(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, uint64_t r8, uint64_t r9){
     switch(rdi){
@@ -118,6 +120,9 @@ uint64_t handleSyscall(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, u
         break;
       case SEMCLOSE:
         handle_sys_sem_close(rsi);
+        break;
+      case GETCURRPID:
+        handle_sys_get_curr_pid();
         break;
 
 	}
@@ -223,4 +228,8 @@ void handle_sys_sem_wait(int * sema){
 
 void handle_sys_sem_close(int * sema){
   semClose(sema);
+}
+
+int handle_sys_get_curr_pid(){
+  return getCurrentPid();
 }

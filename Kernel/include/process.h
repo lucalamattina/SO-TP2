@@ -56,5 +56,4 @@ void ps();
 void block(int pid);
 void kill(int pid);
 void nice(int pid, int priority);
-
 #endif

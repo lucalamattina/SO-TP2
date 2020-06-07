@@ -59,3 +59,7 @@ void wrapper(int (*entryPoint)(int, char**), int argc, char **argv){
   current->process->state = DEAD;
   _interrupt();
 }
+
+int getCurrentPid(){
+  return current->process->pid;
+}

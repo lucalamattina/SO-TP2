@@ -27,9 +27,10 @@
 #define MEM 15
 #define TESTSYNC 16
 #define TESTNOSYNC 17
-#define KILL 18
-#define NICE 19
-#define BLOCK 20
+#define PHILOSOPHERS 18
+#define KILL 19
+#define NICE 20
+#define BLOCK 21
 
 #define FOREGROUND 1
 #define BACKGROUND 0
@@ -43,8 +44,8 @@ typedef struct MM_rq{
 }mm_rq;
 
 //Todos los comandos disponibles
-const char *commands[] = {"help", "shutdown", "invalid", "time", "beep", "sleep", "date", "clear", "div", "credits", "starwars", "mario", "testmm", "testproc", "ps", "mem", "testsync", "testnosync", "kill", "nice", "block"};
-const int commandCount = 18;
+const char *commands[] = {"help", "shutdown", "invalid", "time", "beep", "sleep", "date", "clear", "div", "credits", "starwars", "mario", "testmm", "testproc", "ps", "mem", "testsync", "testnosync", "philosophers", "kill", "nice", "block"};
+const int commandCount = 19;
 int pid;
 int priority;
 
@@ -60,7 +61,7 @@ int * sema;
 //------------------------------------------------------------------------------------------------------
 
 uint64_t my_create_process(char * name, int(*entryPoint)(int,char**)){
-  return sys_new_process(name, 0, NULL, 1, FOREGROUND, entryPoint);
+  return sys_new_process(name, 0, NULL, 10, FOREGROUND, entryPoint);
 }
 
 uint64_t * my_sem_open(char *sem_id){
@@ -93,11 +94,10 @@ void slowInc(uint64_t *p, uint64_t inc){
 
 void my_process_inc(){
   uint64_t i;
-
-  if (!my_sem_open(SEM_ID)){
-    printf("ERROR OPENING SEM\n");
-    return;
-  }
+  //if (! *sema){
+    //printf("ERROR OPENING SEM\n");
+    //return;
+  //}
   
   for (i = 0; i < N; i++){
     my_sem_wait(sema);
@@ -105,7 +105,6 @@ void my_process_inc(){
     my_sem_post(sema);
   }
 
-  my_sem_close(sema);
   
   printf("Final value: %d\n", global);
 }
@@ -113,10 +112,10 @@ void my_process_inc(){
 void my_process_dec(){
   uint64_t i;
 
-  if (!my_sem_open(SEM_ID)){
-    printf("ERROR OPENING SEM\n");
-    return;
-  }
+  //if (! *sema){
+    //printf("ERROR OPENING SEM\n");
+    //return;
+  //}
   
   for (i = 0; i < N; i++){
     my_sem_wait(sema);
@@ -124,7 +123,6 @@ void my_process_dec(){
     my_sem_post(sema);
   }
 
-  my_sem_close(sema);
 
   printf("Final value: %d\n", global);
 }
@@ -135,12 +133,12 @@ void test_sync(){
   global = 0;
 
   printf("CREATING PROCESSES...\n");
-
+  sema = my_sem_open(SEM_ID);
   for(i = 0; i < TOTAL_PAIR_PROCESSES; i++){
     my_create_process("my_process_inc", (uint64_t)my_process_inc);
     my_create_process("my_process_dec", (uint64_t)my_process_dec);
   }
-  
+  my_sem_close(sema);
   // The last one should print 0
 }
 
@@ -495,6 +493,9 @@ void handle_command(int cmd)
   case TESTNOSYNC:
 	test_no_sync();
 	break;
+  case PHILOSOPHERS:
+    philosophers();
+    break;
   case KILL:
     kill(pid);
     break;
@@ -553,6 +554,7 @@ void display_help(void)
   print("mem - Prints memory state\n");
   print("testsync - Tests semaphore sync\n");
   print("testnosync - Tests semaphora no sync\n");
+  print("philosophers - plays philosophers problem\n");
   print("kill - Kill a process given it's pid\n");
   print("nice - Changes a process' priority given it's pid and new priority\n");
   print("block - Blocks a process given it's pid\n");
