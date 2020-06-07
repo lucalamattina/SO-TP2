@@ -8,7 +8,7 @@
 
 #define PROCESS_SIZE 4096
 #define MAX_FD 2
-#define MAX_PROCESSES 20
+#define MAX_PROCESSES 100
 #define FOREGROUND 1
 #define BACKGROUND 0
 

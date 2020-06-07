@@ -99,6 +99,7 @@ int main(){
 	initializeFreeList(free_list_address);
 	initList();
 	initScheduler();
+	initializeSemList();
 	//process * init = newProcess("init",0,NULL, 10, BACKGROUND, (uint64_t) startShell);
 	//setState(init->pid, RUNNING);
 	//fakeStack(init);

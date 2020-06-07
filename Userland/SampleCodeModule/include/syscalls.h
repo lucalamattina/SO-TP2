@@ -29,8 +29,9 @@
 #define SEMPOST 21
 #define SEMWAIT 22
 #define SEMCLOSE 23
-#define GETCURRPID 24
-#define PHILOS 25
+#define PRINTSEM 24
+#define GETCURRPID 25
+#define PHILOS 26
 
 void sys_write(int fd, const char *buf, int count);
 
@@ -79,5 +80,6 @@ void sys_sem_wait(int * sema);
 void sys_sem_close(int * sema);
 
 int sys_get_curr_pid();
+void sys_print_sem();
 
 #endif

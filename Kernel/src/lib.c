@@ -1,5 +1,19 @@
 #include <stdint.h>
 
+
+int strcmp( char * s1,  char * s2){
+    for(;*s1 && *s2 && *s1 == *s2; s1++, s2++);
+    if (*s1==0 && *s2==0) return 0;
+    if (*s1 == 0) return -1;
+    if (*s2 == 0) return 1;
+    return *s1-*s2;
+}
+
+void strcpy(char * dst, char * src){
+    while((*(dst++) = *(src++)) != 0);
+}
+
+
 void * memset(void * destination, int32_t c, uint64_t length)
 {
 	uint8_t chr = (uint8_t)c;
@@ -81,7 +95,7 @@ char* itoa(int value, char* buffer, int base)
 	{
 		int r = n % base;
 
-		//if (r >= 10) 
+		//if (r >= 10)
 		//	buffer[i++] = 65 + (r - 10);
 		//else
 			buffer[i++] = 48 + r;

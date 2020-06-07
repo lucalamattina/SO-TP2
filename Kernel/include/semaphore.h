@@ -8,18 +8,18 @@
 #include <lib.h>
 #include <stdlib.h>
 #include <stddef.h>
-#include <MemoryManager.h>
 
 
 typedef struct sem{
     uint64_t state;
-    char* name;
+    char * name;
     int processList[MAX_PROCESS_COUNT];
     int * id;
 }sem;
 
-extern sem* semList[MAX_SEM_COUNT];
+extern sem * semList[MAX_SEM_COUNT];
 
+void printsem();
 void initializeSemList();
 int getAvailableSemPos();
 int getAvailableProcessPos(sem* semaforo);

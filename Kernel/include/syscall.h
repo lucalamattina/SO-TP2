@@ -35,7 +35,8 @@
 #define SEMPOST 21
 #define SEMWAIT 22
 #define SEMCLOSE 23
-#define GETCURRPID 24
+#define PRINTSEM 24
+#define GETCURRPID 25
 
 uint64_t handleSyscall(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, uint64_t r8, uint64_t r9);
 
