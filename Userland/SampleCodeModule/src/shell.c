@@ -208,7 +208,7 @@ void test_mm(){
 }
 
 void p1(){
-  sys_write()
+  sys_write();
 
 }
 
