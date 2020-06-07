@@ -104,6 +104,9 @@ void sys_sem_close(int * sema){
 	_int80((uint64_t)SEMCLOSE, (uint64_t)sema, 0, 0, 0, 0);
 }
 
+int sys_get_curr_pid(){
+	return _int80((uint64_t)GETCURRPID, 0, 0, 0, 0, 0);
+}
 void sys_print_sem(){
 	_int80((uint64_t)PRINTSEM, 0, 0, 0, 0, 0);
 }

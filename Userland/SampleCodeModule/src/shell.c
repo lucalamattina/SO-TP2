@@ -28,9 +28,10 @@
 #define TESTSYNC 16
 #define TESTNOSYNC 17
 #define PRINTSEM 18
-#define KILL 19
-#define NICE 20
-#define BLOCK 21
+#define PHILOSOPHERS 19
+#define KILL 20
+#define NICE 21
+#define BLOCK 22
 
 #define FOREGROUND 1
 #define BACKGROUND 0
@@ -44,8 +45,8 @@ typedef struct MM_rq{
 }mm_rq;
 
 //Todos los comandos disponibles
-const char *commands[] = {"help", "shutdown", "invalid", "time", "beep", "sleep", "date", "clear", "div", "credits", "starwars", "mario", "testmm", "testproc", "ps", "mem", "testsync", "testnosync", "sem", "kill", "nice", "block"};
-const int commandCount = 19;
+const char *commands[] = {"help", "shutdown", "invalid", "time", "beep", "sleep", "date", "clear", "div", "credits", "starwars", "mario", "testmm", "testproc", "ps", "mem", "testsync", "testnosync", "sem","philosophers", "kill", "nice", "block"};
+const int commandCount = 20;
 int pid;
 int priority;
 
@@ -125,7 +126,7 @@ void test_sync(){
   global = 0;
 
   printf("CREATING PROCESSES...\n");
-
+  sema = my_sem_open(SEM_ID);
   for(i = 0; i < TOTAL_PAIR_PROCESSES; i++){
     my_create_process("my_process_inc", (uint64_t)my_process_inc);
     my_create_process("my_process_dec", (uint64_t)my_process_dec);
@@ -479,7 +480,10 @@ void handle_command(int cmd)
 	  test_sync();
 	  break;
   case TESTNOSYNC:
-	  test_no_sync();
+	test_no_sync();
+	break;
+  case PHILOSOPHERS:
+    philosophers();
 	  break;
   case PRINTSEM:
     printsem();
@@ -543,6 +547,7 @@ void display_help(void)
   print("sem - Prints semaphores\n");
   print("testsync - Tests semaphore sync\n");
   print("testnosync - Tests semaphora no sync\n");
+  print("philosophers - plays philosophers problem\n");
   print("kill - Kill a process given it's pid\n");
   print("nice - Changes a process' priority given it's pid and new priority\n");
   print("block - Blocks a process given it's pid\n");
