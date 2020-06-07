@@ -122,10 +122,11 @@ uint64_t handleSyscall(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, u
       case SEMCLOSE:
         handle_sys_sem_close(rsi);
         break;
-      case GETCURRPID:
-        handle_sys_get_curr_pid();
       case PRINTSEM:
         handle_sys_print_sem();
+        break;
+      case GETCURRPID:
+        handle_sys_get_curr_pid();
         break;
 
 	}
@@ -235,9 +236,10 @@ void handle_sys_sem_close(int * sema){
   semClose(sema);
 }
 
-int handle_sys_get_curr_pid(){
-  return getCurrentPid();
-}
 void handle_sys_print_sem(){
   printsem();
+}
+
+int handle_sys_get_curr_pid(){
+  return getCurrentPid();
 }
