@@ -126,6 +126,10 @@ void ps(){
 }
 
 void block(int pid){
+	if(pid == 0){
+		print("You can't block shell\n");
+		return;
+	}
 	process * aux = getProcess(pid);
 	if(aux != NULL && aux->state != DEAD){
 			if(aux->state == BLOCKED){
