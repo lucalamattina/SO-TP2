@@ -14,7 +14,7 @@ int philos[MAX_PHYLO_COUNT];
 int states[MAX_PHYLO_COUNT];
 
 int currPhilCount;
-
+int start = 1;
 int * semPhilo;
 
 void initPhilos(){
@@ -93,60 +93,74 @@ int removePhilo(){
     philos[i]=-1;
     states[i]=-1;
     sys_sem_post(semPhilo);
+    currPhilCount--;
     return 1;
 }
 
-int left(int i, int mod){
-  int ret = (i - 1) % mod;
-  if (ret < 0){
-    return mod + ret;
-  } else {
-    return ret;
-  }
+int center(int pos){
+ return pos;
 }
 
-int right(int i, int mod){
-  int ret = (i + 1) % mod;
-  return ret;
+int right(int pos){
+  if(pos==0){
+    return (currPhilCount -1);
+  }
+  return pos-1;
+}
+
+int left(int pos){
+  if(pos == (currPhilCount -1)){
+    return 0;
+  }
+  return pos+1;
 }
 
 void check(int pos){
-  if (states[pos] == HUNGRY && states[left(pos, currPhilCount)] != EATING && states[right(pos, currPhilCount)] != EATING){
-    sys_sem_wait(forks[left(pos, currPhilCount)]);
-    sys_sem_wait(forks[right(pos, currPhilCount)]);
+  if (states[pos] == HUNGRY && states[left(pos)] != EATING && states[right(pos)] != EATING){
+    sys_sem_wait(forks[center(pos)]);
+    sys_sem_wait(forks[right(pos)]);
     states[pos] = EATING;
-  }
+   }
 }
 
 void takeForks(int pos){
     sys_sem_wait(semPhilo);
     check(pos);
+    printBoard();
     sys_sem_post(semPhilo);
 }
 
 void placeForks(int pos){
   sys_sem_wait(semPhilo);
   states[pos] = FULL;
-  sys_sem_post(forks[left(pos, currPhilCount)]);
-  sys_sem_post(forks[right(pos, currPhilCount)]);
-  check(left(pos, currPhilCount));
-  check(right(pos, currPhilCount));
+  sys_sem_post(forks[center(pos)]);
+  sys_sem_post(forks[right(pos)]);
+  check(left(pos));
+  check(right(pos));
+  printBoard();
+  if(states[left(pos)]==EATING){
+    states[left(pos)]=FULL;
+  }
+  if(states[right(pos)]==EATING){
+    states[right(pos)]=FULL;
+  }
   sys_sem_post(semPhilo);
 }
 
 void philo(){
+    while(start){
     sys_sem_wait(semPhilo);
     int pid = sys_get_curr_pid();
     int pos;
     int i;
-    for(int i=0; philos[i]!=pid;i++){}
+    for(i=0; philos[i]!=pid;i++){}
     pos=i;
     while(states[pos]==HUNGRY){
         takeForks(pos);
-        //sys_sleep(1000);
         placeForks(pos);
     }
-  //sys_sem_post(semPhilo); tira page fault anda a saber poke
+    }
+     sys_sem_post(semPhilo);
 }
 
 int hungry(){
@@ -169,63 +183,74 @@ void resetHungry(){
     }
 }
 
-void printTable(){
-  int totalCharCount = (currPhilCount * 3) + 2;
-  char table[totalCharCount];
+void printBoard(){
+  int charCount = (currPhilCount * 3) + 2;
+  char board[charCount];
   for (int i = 0; i < currPhilCount; i++){
     switch(states[i]){
       case HUNGRY:
-        table[(3 * i)] = '(';
-        table[(3 * i) + 1] = 'H';
-        table[(3 * i) + 2] = ')';
+        board[(3 * i)] = ' ';
+        board[(3 * i) + 1] = '.';
+        board[(3 * i) + 2] = ' ';
       break;
       case FULL:
-        table[(3 * i)] = '(';
-        table[(3 * i) + 1] = 'F';
-        table[(3 * i) + 2] = ')';
+        board[(3 * i)] = ' ';
+        board[(3 * i) + 1] = 'T';
+        board[(3 * i) + 2] = ' ';
       break;
       case EATING:
-        table[(3 * i)] = '(';
-        table[(3 * i) + 1] = 'E';
-        table[(3 * i) + 2] = ')';
+        board[(3 * i)] = ' ';
+        board[(3 * i) + 1] = 'E';
+        board[(3 * i) + 2] = ' ';
       break;
     }
   }
-  table[totalCharCount - 2] = '\n';
-  table[totalCharCount - 1] = 0;
-  print(table);
+  board[charCount - 2] = '\n';
+  board[charCount - 1] = 0;
+  print(board);
 }
 
 
 void philosophers(){
     initPhilos();
     uint64_t * semPhilo = sys_sem_open("game");
-    int start = 1;
     while(start){
         while(hungry() && start){
            char key = getKey();
             switch (key) {
       case 'a':
-        if (addPhilo()){
+        if (!addPhilo()){
           print("Invalid Operation: Maximum philosophers count reached\n");
         } else {
           print("New philosopher added\n");
         }
       break;
       case 'r':
-        if (removePhilo()){
+        if (!removePhilo()){
           print("Invalid Operation: Minimum philosophers count reached\n");
         } else {
+          sys_sem_close(forks[currPhilCount]);
+          if(philos[currPhilCount]!=0){
+          sys_kill(philos[currPhilCount]);
+          }
           print("A philosopher has been removed\n");
         }
       break;
       case 'q':
+        print("\nChange the world, my final message. Goodbye\n\n");
         print("Program Finished!\n");
+        for(int x = 0; x<currPhilCount;x++){
+          sys_sem_close(forks[x]);
+          if(philos[x]!=0){
+          sys_kill(philos[x]);
+          }
+        }
+        sys_sem_close(semPhilo);
         start = 0;
       break;
     }
-            printTable();
         }
+    print("All philosophers have eaten, resetting hunger\n");
     resetHungry();
     }
 }

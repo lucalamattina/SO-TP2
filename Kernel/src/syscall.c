@@ -126,7 +126,7 @@ uint64_t handleSyscall(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, u
         handle_sys_print_sem();
         break;
       case GETCURRPID:
-        handle_sys_get_curr_pid();
+        return handle_sys_get_curr_pid();
         break;
 
 	}

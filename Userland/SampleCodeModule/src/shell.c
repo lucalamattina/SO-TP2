@@ -45,7 +45,7 @@ typedef struct MM_rq{
 }mm_rq;
 
 //Todos los comandos disponibles
-const char *commands[] = {"help", "shutdown", "invalid", "time", "beep", "sleep", "date", "clear", "div", "credits", "starwars", "mario", "testmm", "testproc", "ps", "mem", "testsync", "testnosync", "sem","philosophers", "kill", "nice", "block"};
+const char *commands[] = {"help", "shutdown", "invalid", "time", "beep", "sleep", "date", "clear", "div", "credits", "starwars", "mario", "testmm", "testproc", "ps", "mem", "testsync", "testnosync", "sem","philos", "kill", "nice", "block"};
 const int commandCount = 20;
 int pid;
 int priority;
@@ -545,7 +545,7 @@ void display_help(void)
   print("sem - Prints semaphores\n");
   print("testsync - Tests semaphore sync\n");
   print("testnosync - Tests semaphora no sync\n");
-  print("philosophers - plays philosophers problem\n");
+  print("philos - plays philosophers problem\n");
   print("kill - Kill a process given it's pid\n");
   print("nice - Changes a process' priority given it's pid and new priority\n");
   print("block - Blocks a process given it's pid\n");
