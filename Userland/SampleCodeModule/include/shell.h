@@ -35,9 +35,8 @@ void sleep(void);
 
 void display_invalid_command(void);
 
-void test_mm(void);
 
-void test_proc();
+
 
 void ps();
 
