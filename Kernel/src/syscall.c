@@ -150,6 +150,9 @@ uint64_t handleSyscall(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, u
       case GETCURRPID:
         return handle_sys_get_curr_pid();
         break;
+      case GETCURRPID:
+        return handle_sys_get_curr_pid();
+        break;
 
 	}
 	return 0;
