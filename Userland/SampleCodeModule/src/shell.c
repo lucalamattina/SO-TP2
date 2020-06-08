@@ -52,7 +52,11 @@ typedef struct MM_rq{
 }mm_rq;
 
 //Todos los comandos disponibles
+<<<<<<< HEAD
 const char *commands[] = {"help", "shutdown", "invalid", "time", "beep", "sleep", "date", "clear", "div", "credits", "starwars", "mario", "testmm", "testproc", "ps", "mem", "testsync", "testnosync","pipes", "sem", "kill", "nice", "block"};
+=======
+const char *commands[] = {"help", "shutdown", "invalid", "time", "beep", "sleep", "date", "clear", "div", "credits", "starwars", "mario", "testmm", "testproc", "ps", "mem", "testsync", "testnosync", "sem","philos", "kill", "nice", "block"};
+>>>>>>> f0f305a9e6be88da594c6d6758852a83c4fa39cc
 const int commandCount = 20;
 int pid;
 int priority;
@@ -73,6 +77,7 @@ void display_credits(void);
 void make_starwars(void);
 void make_mario(void);
 
+<<<<<<< HEAD
 int * sema;
 
 //----------------------------------------------------------------------------------------------------------------------------
@@ -299,6 +304,8 @@ void loop(){
     sleep();
   }
 }
+=======
+>>>>>>> f0f305a9e6be88da594c6d6758852a83c4fa39cc
 
 
 void ps(){
@@ -690,12 +697,6 @@ void handle_command(int cmd)
 	case MARIO_COMMAND:
 		make_mario();
 		break;
-	case TEST_MM:
-		test_mm();
-		break;
-  case TESTPROC:
-    test_proc();
-    break;
   case PS:
     ps();
     break;
@@ -793,12 +794,16 @@ void display_help(void)
   print("sem - Prints semaphores\n");
   print("testsync - Tests semaphore sync\n");
   print("testnosync - Tests semaphora no sync\n");
+<<<<<<< HEAD
   print("pipes - Prints pipes and their states\n");
   print("cat - Prints stdin\n");
   print("loop - Prints it's own pid with a message\n");
   print("wc - Counts new lines in stdin\n");
   print("filter - Filters stdin vocals\n");
   print("philos - Run philosophers game\n");
+=======
+  print("philos - plays philosophers problem\n");
+>>>>>>> f0f305a9e6be88da594c6d6758852a83c4fa39cc
   print("kill - Kill a process given it's pid\n");
   print("nice - Changes a process' priority given it's pid and new priority\n");
   print("block - Blocks a process given it's pid\n");
