@@ -1,6 +1,6 @@
 #include <pipe.h>
 
-
+extern void _interrupt();
 pipe * pipeList[MAX_PIPES] = {NULL};
 
 int newPipe(char * name){

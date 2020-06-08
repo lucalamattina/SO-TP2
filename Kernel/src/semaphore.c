@@ -1,5 +1,7 @@
 #include <semaphore.h>
 
+extern void _interrupt();
+
 sem * semList[MAX_SEM_COUNT];
 
 void initializeSemList(){

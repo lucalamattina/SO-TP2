@@ -16,6 +16,7 @@ int states[MAX_PHYLO_COUNT];
 int currPhilCount;
 int start = 1;
 int * semPhilo;
+int background;
 
 void initPhilos(){
     for(int i=4; i<MAX_PHYLO_COUNT; i++){
@@ -28,10 +29,10 @@ void initPhilos(){
     int * fork3 = sys_sem_open("fork3");
     int * fork4 = sys_sem_open("fork4");
 
-    int  philo1 = sys_new_process("philo1", 0, NULL, 10, FOREGROUND, philo);
-    int  philo2 = sys_new_process("philo2", 0, NULL, 10, FOREGROUND, philo);
-    int  philo3 = sys_new_process("philo3", 0, NULL, 10, FOREGROUND, philo);
-    int  philo4 = sys_new_process("philo4", 0, NULL, 10, FOREGROUND, philo);
+    int  philo1 = sys_new_process("philo1", 0, NULL, 10, background, (uint64_t)philo);
+    int  philo2 = sys_new_process("philo2", 0, NULL, 10, background, (uint64_t)philo);
+    int  philo3 = sys_new_process("philo3", 0, NULL, 10, background, (uint64_t)philo);
+    int  philo4 = sys_new_process("philo4", 0, NULL, 10, background, (uint64_t)philo);
 
     currPhilCount = 4;
 
@@ -65,7 +66,7 @@ int addPhilo(){
     char vec[2];
     itoa(aux, vec ,10);
     concat(phil+5, vec);
-    int newphilo = sys_new_process(phil, 0, NULL, 10, FOREGROUND, philo);
+    int newphilo = sys_new_process(phil, 0, NULL, 10, background, (uint64_t)philo);
     philos[i] = newphilo;
     states[i] = 0;
     char * fork = "fork";
@@ -212,6 +213,7 @@ void printBoard(){
 
 
 void philosophers(){
+    background = sys_get_visibility(sys_get_curr_pid());
     initPhilos();
     print("Welcome to the philosophers problem\nPress A to add a new philosophers, R to remove a philosopher and X to return to Menu\n");
     int * semPhilo = sys_sem_open("game");

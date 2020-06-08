@@ -20,21 +20,22 @@
 #define MALLOC 12
 #define FREE 13
 #define NEWPROC 14
-#define PS 15
+#define PSS 15
 #define KILL 16
 #define NICE 17
 #define BLOCK 18
-#define MEM 19
+#define MEMM 19
 #define SEMOPEN 20
 #define SEMPOST 21
 #define SEMWAIT 22
 #define SEMCLOSE 23
-#define PRINTSEM 24
+#define PRINTSEMM 24
 #define OPENPIPE 25
-#define PRINTPIPES 26
+#define PRINTPIPESS 26
 #define SETFD 27
 #define GETFD 28
 #define GETCURRPID 29
+#define GETVISIBILITY 30
 
 void sys_write(int fd, const char *buf, int count);
 
@@ -62,7 +63,7 @@ void * sys_malloc(size_t size);
 
 void sys_free(void * p);
 
-int sys_new_process(char * name, int argc, char ** argv, int priority, int isForeground, int (*entryPoint) (int, char **));
+int sys_new_process(char * name, int argc, char ** argv, int priority, int isForeground, uint64_t entryPoint);
 
 void sys_ps();
 
@@ -93,5 +94,7 @@ void sys_print_pipes();
 void sys_set_fd(int pid, int fdToModify, int newFd);
 
 int sys_get_fd(int pid, int fdPos);
+
+int sys_get_visibility(int pid);
 
 #endif

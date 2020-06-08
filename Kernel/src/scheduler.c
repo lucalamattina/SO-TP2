@@ -1,5 +1,8 @@
 #include <scheduler.h>
 
+extern void _interrupt();
+extern int _fakeStack();
+
 static int quantum;
 processNode * current;
 

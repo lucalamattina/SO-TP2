@@ -182,3 +182,11 @@ int getFd(int pid, int fdPos){
 	}
 	return -1;
 }
+
+int getVisibility(int pid){
+	process * aux = getProcess(pid);
+	if (aux != NULL) {
+		return aux->priority < 0 ? 0 : 1;
+	}
+	return -1;
+}

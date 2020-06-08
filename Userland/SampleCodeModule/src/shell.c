@@ -21,43 +21,40 @@
 #define CREDITS_COMMAND 9
 #define STARWARS_COMMAND 10
 #define MARIO_COMMAND 11
-#define TEST_MM 12
-#define TESTPROC 13
-#define PS 14
-#define MEM 15
-#define TESTSYNC 16
-#define TESTNOSYNC 17
-#define PRINTSEM 18
-#define PRINTPIPES 19
-#define KILL 20
-#define NICE 21
-#define BLOCK 22
-#define WC 23
-#define CAT 24
-#define FILTER 25
-#define LOOP 26
-#define PHILOSOPHERS 27
-#define PIPE 28
+//#define TEST_MM 12
+//#define TESTPROC 13
+#define PS 12
+#define MEM 13
+//#define TESTSYNC 16
+//#define TESTNOSYNC 17
+#define PRINTSEM 14
+#define PRINTPIPES 15
+#define KILL 16
+#define NICE 17
+#define BLOCK 18
+#define WC 19
+#define CAT 20
+#define FILTER 21
+#define LOOP 22
+#define PHILOSOPHERS 23
+#define PIPE 24
 
 
 #define FOREGROUND 1
 #define BACKGROUND 0
 
-#define MAX_BLOCKS 128
-#define MAX_MEMORY 1024 //Should be around 80% of memory managed by the MM
+// #define MAX_BLOCKS 128
+// #define MAX_MEMORY 1024 //Should be around 80% of memory managed by the MM
 
-typedef struct MM_rq{
-  void * address;
-  uint32_t size;
-}mm_rq;
+// typedef struct MM_rq{
+//   void * address;
+//   uint32_t size;
+// }mm_rq;
 
 //Todos los comandos disponibles
-<<<<<<< HEAD
-const char *commands[] = {"help", "shutdown", "invalid", "time", "beep", "sleep", "date", "clear", "div", "credits", "starwars", "mario", "testmm", "testproc", "ps", "mem", "testsync", "testnosync","pipes", "sem", "kill", "nice", "block"};
-=======
-const char *commands[] = {"help", "shutdown", "invalid", "time", "beep", "sleep", "date", "clear", "div", "credits", "starwars", "mario", "testmm", "testproc", "ps", "mem", "testsync", "testnosync", "sem","philos", "kill", "nice", "block"};
->>>>>>> f0f305a9e6be88da594c6d6758852a83c4fa39cc
-const int commandCount = 20;
+const char *commands[] = {"help", "shutdown", "invalid", "time", "beep", "sleep", "date", "clear", "div", "credits", "starwars", "mario", "ps", "mem", "pipes", "sem", "kill", "nice", "block"};
+
+const int commandCount = 16;
 int pid;
 int priority;
 int isBackground = 0;
@@ -77,185 +74,184 @@ void display_credits(void);
 void make_starwars(void);
 void make_mario(void);
 
-<<<<<<< HEAD
 int * sema;
 
 //----------------------------------------------------------------------------------------------------------------------------
-uint64_t my_create_process(char * name, int(*entryPoint)(int,char**)){
-  return sys_new_process(name, 0, NULL, 10, FOREGROUND, entryPoint);
-}
+// uint64_t my_create_process(char * name, int(*entryPoint)(int,char**)){
+//   return sys_new_process(name, 0, NULL, 10, FOREGROUND, entryPoint);
+// }
+//
+//
+// uint64_t * my_sem_open(char *sem_id){
+//   return sys_sem_open(sem_id);
+// }
+//
+// void my_sem_wait(int * sem_id){
+//  sys_sem_wait(sem_id);
+// }
+//
+// void my_sem_post(int * sem_id){
+//   sys_sem_post(sem_id);
+// }
+//
+// void my_sem_close(int * sem_id){
+//   sys_sem_close(sem_id);
+// }
+//
+// #define N 1000
+// #define SEM_ID "semaforillo"
+// #define TOTAL_PAIR_PROCESSES 2
+//
+// uint64_t global;  //shared memory
 
-
-uint64_t * my_sem_open(char *sem_id){
-  return sys_sem_open(sem_id);
-}
-
-void my_sem_wait(int * sem_id){
- sys_sem_wait(sem_id);
-}
-
-void my_sem_post(int * sem_id){
-  sys_sem_post(sem_id);
-}
-
-void my_sem_close(int * sem_id){
-  sys_sem_close(sem_id);
-}
-
-#define N 1000
-#define SEM_ID "semaforillo"
-#define TOTAL_PAIR_PROCESSES 2
-
-uint64_t global;  //shared memory
-
-void slowInc(uint64_t *p, uint64_t inc){
-  uint64_t aux = *p;
-  aux += inc;
-  *p = aux;
-}
-
-void my_process_inc(){
-  uint64_t i;
-  sema = my_sem_open(SEM_ID);
-  for (i = 0; i < N; i++){
-    my_sem_wait(sema);
-    slowInc(&global, 1);
-    my_sem_post(sema);
-  }
-
-  my_sem_close(sema);
-  printf("Final value: %d\n", global);
-
-}
-
-void my_process_dec(){
-  uint64_t i;
-  sema = my_sem_open(SEM_ID);
-  for (i = 0; i < N; i++){
-    my_sem_wait(sema);
-    slowInc(&global, -1);
-    my_sem_post(sema);
-  }
-  my_sem_close(sema);
-  printf("Final value: %d\n", global);
-
-}
-
-void test_sync(){
-
-  uint64_t i;
-
-  global = 0;
-
-  printf("CREATING PROCESSES...\n");
-  sema = my_sem_open(SEM_ID);
-  for(i = 0; i < TOTAL_PAIR_PROCESSES; i++){
-    my_create_process("my_process_inc", (uint64_t)my_process_inc);
-    my_create_process("my_process_dec", (uint64_t)my_process_dec);
-  }
-
-  // The last one should print 0
-}
-
-void my_process_inc_no_sem(){
-  uint64_t i;
-  for (i = 0; i < N; i++){
-    slowInc(&global, 1);
-  }
-
-  printf("Final value: %d\n", global);
-}
-
-void my_process_dec_no_sem(){
-  uint64_t i;
-  for (i = 0; i < N; i++){
-    slowInc(&global, -1);
-  }
-
-  printf("Final value: %d\n", global);
-}
-
-void test_no_sync(){
-  uint64_t i;
-
-  global = 0;
-
-  printf("CREATING PROCESSES...\n");
-
-  for(i = 0; i < TOTAL_PAIR_PROCESSES; i++){
-    my_create_process("my_process_inc_no_sem", (uint64_t)my_process_inc_no_sem);
-    my_create_process("my_process_dec_no_sem", (uint64_t)my_process_inc_no_sem);
-  }
-
-  // The last one should not print 0
-}
+// void slowInc(uint64_t *p, uint64_t inc){
+//   uint64_t aux = *p;
+//   aux += inc;
+//   *p = aux;
+// }
+//
+// void my_process_inc(){
+//   uint64_t i;
+//   sema = my_sem_open(SEM_ID);
+//   for (i = 0; i < N; i++){
+//     my_sem_wait(sema);
+//     slowInc(&global, 1);
+//     my_sem_post(sema);
+//   }
+//
+//   my_sem_close(sema);
+//   printf("Final value: %d\n", global);
+//
+// }
+//
+// void my_process_dec(){
+//   uint64_t i;
+//   sema = my_sem_open(SEM_ID);
+//   for (i = 0; i < N; i++){
+//     my_sem_wait(sema);
+//     slowInc(&global, -1);
+//     my_sem_post(sema);
+//   }
+//   my_sem_close(sema);
+//   printf("Final value: %d\n", global);
+//
+// }
+//
+// void test_sync(){
+//
+//   uint64_t i;
+//
+//   global = 0;
+//
+//   printf("CREATING PROCESSES...\n");
+//   sema = my_sem_open(SEM_ID);
+//   for(i = 0; i < TOTAL_PAIR_PROCESSES; i++){
+//     my_create_process("my_process_inc", (uint64_t)my_process_inc);
+//     my_create_process("my_process_dec", (uint64_t)my_process_dec);
+//   }
+//
+//   // The last one should print 0
+// }
+//
+// void my_process_inc_no_sem(){
+//   uint64_t i;
+//   for (i = 0; i < N; i++){
+//     slowInc(&global, 1);
+//   }
+//
+//   printf("Final value: %d\n", global);
+// }
+//
+// void my_process_dec_no_sem(){
+//   uint64_t i;
+//   for (i = 0; i < N; i++){
+//     slowInc(&global, -1);
+//   }
+//
+//   printf("Final value: %d\n", global);
+// }
+//
+// void test_no_sync(){
+//   uint64_t i;
+//
+//   global = 0;
+//
+//   printf("CREATING PROCESSES...\n");
+//
+//   for(i = 0; i < TOTAL_PAIR_PROCESSES; i++){
+//     my_create_process("my_process_inc_no_sem", (uint64_t)my_process_inc_no_sem);
+//     my_create_process("my_process_dec_no_sem", (uint64_t)my_process_inc_no_sem);
+//   }
+//
+//   // The last one should not print 0
+// }
 
 //----------------------------------------------------------------------------------------------------------------------------
 
-void test_mm(){
-  mm_rq mm_rqs[MAX_BLOCKS];
-  uint8_t rq;
-  uint32_t total;
+// void test_mm(){
+//   mm_rq mm_rqs[MAX_BLOCKS];
+//   uint8_t rq;
+//   uint32_t total;
+//
+// 	while(1){
+//     rq = 0;
+//     total = 0;
+//     //printminus();
+//     // Request as many blocks as we can
+//     while(rq < MAX_BLOCKS && total < MAX_MEMORY){
+//       mm_rqs[rq].size = GetUniform(MAX_MEMORY - total - 1) + 1;
+//       mm_rqs[rq].address = sys_malloc(mm_rqs[rq].size); // TODO: Port this call as required
+//
+//       total += mm_rqs[rq].size;
+//       rq++;
+//     }
+//
+//     // Set
+//     uint32_t i;
+//     for (i = 0; i < rq; i++)
+//       if (mm_rqs[i].address != NULL)
+//         memset(mm_rqs[i].address, i, mm_rqs[i].size); // TODO: Port this call as required
+//
+//     // Check
+//     for (i = 0; i < rq; i++)
+//       if (mm_rqs[i].address != NULL)
+//         if(!memcheck(mm_rqs[i].address, i, mm_rqs[i].size))
+//           printf("ERROR!\n"); // TODO: Port this call as required
+//
+//     // Free
+//     for (i = 0; i < rq; i++)
+//       if (mm_rqs[i].address != NULL)
+//         sys_free(mm_rqs[i].address);  // TODO: Port this call as required
+//   }
+// }
+//
+// void p1(){
+//   printf("p1 fd: %d\n", sys_get_fd(sys_get_curr_pid(), 1));
+//   sys_write(sys_get_fd(sys_get_curr_pid(), 1), "aloja viejita", 0);
+//   sys_print_pipes();
+//
+// }
 
-	while(1){
-    rq = 0;
-    total = 0;
-    //printminus();
-    // Request as many blocks as we can
-    while(rq < MAX_BLOCKS && total < MAX_MEMORY){
-      mm_rqs[rq].size = GetUniform(MAX_MEMORY - total - 1) + 1;
-      mm_rqs[rq].address = sys_malloc(mm_rqs[rq].size); // TODO: Port this call as required
-
-      total += mm_rqs[rq].size;
-      rq++;
-    }
-
-    // Set
-    uint32_t i;
-    for (i = 0; i < rq; i++)
-      if (mm_rqs[i].address != NULL)
-        memset(mm_rqs[i].address, i, mm_rqs[i].size); // TODO: Port this call as required
-
-    // Check
-    for (i = 0; i < rq; i++)
-      if (mm_rqs[i].address != NULL)
-        if(!memcheck(mm_rqs[i].address, i, mm_rqs[i].size))
-          printf("ERROR!\n"); // TODO: Port this call as required
-
-    // Free
-    for (i = 0; i < rq; i++)
-      if (mm_rqs[i].address != NULL)
-        sys_free(mm_rqs[i].address);  // TODO: Port this call as required
-  }
-}
-
-void p1(){
-  printf("p1 fd: %d\n", sys_get_fd(sys_get_curr_pid(), 1));
-  sys_write(sys_get_fd(sys_get_curr_pid(), 1), "aloja viejita", 0);
-  sys_print_pipes();
-
-}
-
-void p2(){
-  char bufeta[20];
-  printf("p2 fd: %d\n", sys_get_fd(sys_get_curr_pid(), 0));
-  sys_read(sys_get_fd(sys_get_curr_pid(),0), bufeta,0);
-  printf("%s\n", bufeta);
-}
-
-void test_proc(){
-  // printf("current pid: %d\n", sys_get_curr_pid());
-  int fd = sys_open_pipe("holis");
-  // printf("pipe fd: %d\n", fd);
-  int pid1 = sys_new_process("p1", 0, NULL, 1, FOREGROUND, p1);
-  sys_set_fd(pid1, 1, fd);
-  // printf("p1 fd: %d\n", sys_get_fd(pid1, 1));
-  int pid2 = sys_new_process("p2", 0, NULL, 1, FOREGROUND, p2);
-  sys_set_fd(pid2, 0, fd);
-  // printf("p2 fd: %d\n", sys_get_fd(pid2, 0));
-
-
-}
+// void p2(){
+//   char bufeta[20];
+//   printf("p2 fd: %d\n", sys_get_fd(sys_get_curr_pid(), 0));
+//   sys_read(sys_get_fd(sys_get_curr_pid(),0), bufeta,0);
+//   printf("%s\n", bufeta);
+// }
+//
+// void test_proc(){
+//   // printf("current pid: %d\n", sys_get_curr_pid());
+//   int fd = sys_open_pipe("holis");
+//   // printf("pipe fd: %d\n", fd);
+//   int pid1 = sys_new_process("p1", 0, NULL, 1, FOREGROUND, p1);
+//   sys_set_fd(pid1, 1, fd);
+//   // printf("p1 fd: %d\n", sys_get_fd(pid1, 1));
+//   int pid2 = sys_new_process("p2", 0, NULL, 1, FOREGROUND, p2);
+//   sys_set_fd(pid2, 0, fd);
+//   // printf("p2 fd: %d\n", sys_get_fd(pid2, 0));
+//
+//
+// }
 
 void cat(){
   char buffer[1024] = {0};
@@ -304,8 +300,7 @@ void loop(){
     sleep();
   }
 }
-=======
->>>>>>> f0f305a9e6be88da594c6d6758852a83c4fa39cc
+
 
 
 void ps(){
@@ -635,7 +630,7 @@ int getCommand(char *cmd)
     strcpy(pipeName, "pipe");
     char pipeIndex[4];
     itoa(pipeCount, pipeIndex, 10);
-    concat(pipeName[4], pipeIndex);
+    concat((char *)(pipeName + 4), pipeIndex);
     pipeFd = sys_open_pipe(pipeName);
     pipeCount++;
     isBackground = 0;
@@ -703,12 +698,6 @@ void handle_command(int cmd)
   case MEM:
     mem();
     break;
-  case TESTSYNC:
-	  test_sync();
-	  break;
-  case TESTNOSYNC:
-  	test_no_sync();
-  	break;
   case PRINTSEM:
     printsem();
     break;
@@ -731,7 +720,7 @@ void handle_command(int cmd)
     sys_new_process("wc", 0, NULL, 10, isBackground ? BACKGROUND : FOREGROUND, (uint64_t)wc);
     break;
   case PHILOSOPHERS:
-    sys_new_process("philo", 0, NULL, 10, isBackground ? BACKGROUND : FOREGROUND, (uint64_t)philosophers);
+    sys_new_process("philos", 0, NULL, 10, isBackground ? BACKGROUND : FOREGROUND, (uint64_t)philosophers);
     break;
   case FILTER:
     sys_new_process("filter", 0, NULL, 10, isBackground ? BACKGROUND : FOREGROUND, (uint64_t)filter);
@@ -787,23 +776,19 @@ void display_help(void)
 	print("credits - Displays info about the group\n");
 	print("starwars - Makes a cool Star Wars sound!\n");
 	print("mario - Makes a cool Mario sound!\n");
-	print("testmm - Tests memory manager\n");
-  print("testproc - Tests processes\n");
+	// print("testmm - Tests memory manager\n");
+  // print("testproc - Tests processes\n");
   print("ps - Prints basic information abouth each process\n");
   print("mem - Prints memory state\n");
   print("sem - Prints semaphores\n");
-  print("testsync - Tests semaphore sync\n");
-  print("testnosync - Tests semaphora no sync\n");
-<<<<<<< HEAD
+  // print("testsync - Tests semaphore sync\n");
+  // print("testnosync - Tests semaphora no sync\n");
   print("pipes - Prints pipes and their states\n");
   print("cat - Prints stdin\n");
   print("loop - Prints it's own pid with a message\n");
   print("wc - Counts new lines in stdin\n");
   print("filter - Filters stdin vocals\n");
   print("philos - Run philosophers game\n");
-=======
-  print("philos - plays philosophers problem\n");
->>>>>>> f0f305a9e6be88da594c6d6758852a83c4fa39cc
   print("kill - Kill a process given it's pid\n");
   print("nice - Changes a process' priority given it's pid and new priority\n");
   print("block - Blocks a process given it's pid\n");

@@ -17,6 +17,7 @@
 #include <MemoryManager.h>
 #include <process.h>
 #include <scheduler.h>
+#include <semaphore.h>
 
 
 extern uint8_t text;

@@ -63,13 +63,13 @@ void sys_free(void * p){
 	_int80((uint64_t)FREE, (uint64_t)p,0,0,0,0);
 }
 
-int sys_new_process(char * name, int argc, char ** argv, int priority, int isForeground, int (*entryPoint) (int, char **)){
+int sys_new_process(char * name, int argc, char ** argv, int priority, int isForeground, uint64_t entryPoint){
 	int priorityAux = isForeground == 0 ? (-1) * priority : priority;
 	return (int)_int80((uint64_t)NEWPROC,(uint64_t) name, (uint64_t)argc, (uint64_t)argv, (uint64_t)priorityAux, (uint64_t)entryPoint);
 }
 
 void sys_ps(void){
-	_int80((uint64_t)PS, 0, 0, 0, 0, 0);
+	_int80((uint64_t)PSS, 0, 0, 0, 0, 0);
 }
 
 void sys_kill(int pid){
@@ -85,7 +85,7 @@ void sys_block(int pid){
 }
 
 void sys_mem(){
-	_int80((uint64_t)MEM, 0, 0, 0, 0, 0);
+	_int80((uint64_t)MEMM, 0, 0, 0, 0, 0);
 }
 
 int * sys_sem_open(char * name){
@@ -108,7 +108,7 @@ int sys_get_curr_pid(){
 	return _int80((uint64_t)GETCURRPID, 0, 0, 0, 0, 0);
 }
 void sys_print_sem(){
-	_int80((uint64_t)PRINTSEM, 0, 0, 0, 0, 0);
+	_int80((uint64_t)PRINTSEMM, 0, 0, 0, 0, 0);
 }
 
 int sys_open_pipe(char * name){
@@ -116,7 +116,7 @@ int sys_open_pipe(char * name){
 }
 
 void sys_print_pipes(){
-	_int80((uint64_t)PRINTPIPES, 0, 0, 0, 0, 0);
+	_int80((uint64_t)PRINTPIPESS, 0, 0, 0, 0, 0);
 }
 
 void sys_set_fd(int pid, int fdToModify, int newFd){
@@ -125,4 +125,8 @@ void sys_set_fd(int pid, int fdToModify, int newFd){
 
 int sys_get_fd(int pid, int fdPos){
 	return (int)_int80((uint64_t)GETFD, (uint64_t)pid, (uint64_t)fdPos, 0, 0, 0);
+}
+
+int sys_get_visibility(int pid){
+	return (int)_int80((uint64_t)GETVISIBILITY, (uint64_t)pid, 0, 0, 0, 0);
 }

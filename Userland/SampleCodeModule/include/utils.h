@@ -35,6 +35,10 @@ void writeKey(char * key);
 
 int strcmp(const char * stra, const char * strb);
 
+int strncmp(const char * stra, const char * strb, size_t n);
+
+int isAlpha(char c);
+
 int strlen(const char * str);
 
 void strncpy(char * dst, char * src, int n);
@@ -58,5 +62,7 @@ void clearScreen();
 void * malloc(size_t size);
 
 void free(void * p);
+
+int concat(char * to, const char * from);
 
 #endif

@@ -33,7 +33,7 @@ void handle_pfree(void * p);
 
 int handle_sys_new_process(char * name, int argc, char ** argv, int priority, int (*entryPoint) (int, char **));
 
-void handle_sys_ps();
+void handle_sys_ps(void);
 
 void handle_sys_kill(int pid);
 
@@ -41,7 +41,7 @@ void handle_sys_block(int pid);
 
 void handle_sys_nice(int pid, int priority);
 
-void handle_sys_mem();
+void handle_sys_mem(void);
 
 int * handle_sys_sem_open(char * name);
 
@@ -51,17 +51,19 @@ void handle_sys_sem_wait(int * sema);
 
 void handle_sys_sem_close(int * sema);
 
-int handle_sys_get_curr_pid();
+int handle_sys_get_curr_pid(void);
 
-void hande_sys_print_sem();
+void hande_sys_print_sem(void);
 
 int handle_sys_open_pipe(char * name);
 
-void handle_sys_print_pipes();
+void handle_sys_print_pipes(void);
 
 void handle_sys_set_fd(int pid, int fdToModify, int newFd);
 
 int handle_sys_get_fd(int pid, int fdPos);
+
+int handle_sys_get_visibility(int pid);
 
 //Handler de la llamada a la int 80
 uint64_t handleSyscall(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, uint64_t r8, uint64_t r9){
@@ -100,10 +102,10 @@ uint64_t handleSyscall(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, u
         return (uint64_t)handle_pmalloc(rsi);
         break;
       case FREE:
-        handle_pfree(rsi);
+        handle_pfree((void *)rsi);
         break;
       case NEWPROC:
-        return handle_sys_new_process(rsi, rdx, rcx, r8, r9);
+        return handle_sys_new_process((char *)rsi, rdx, (char **)rcx, r8, (int (*) (int, char **))r9);
         break;
       case PS:
         handle_sys_ps();
@@ -121,22 +123,22 @@ uint64_t handleSyscall(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, u
         handle_sys_mem();
         break;
       case SEMOPEN:
-        return (uint64_t)handle_sys_sem_open(rsi);
+        return (uint64_t)handle_sys_sem_open((char *)rsi);
         break;
       case SEMPOST:
-        handle_sys_sem_post(rsi);
+        handle_sys_sem_post((int *)rsi);
         break;
       case SEMWAIT:
-        handle_sys_sem_wait(rsi);
+        handle_sys_sem_wait((int *)rsi);
         break;
       case SEMCLOSE:
-        handle_sys_sem_close(rsi);
+        handle_sys_sem_close((int *)rsi);
         break;
       case PRINTSEM:
         handle_sys_print_sem();
         break;
       case OPENPIPE:
-        return handle_sys_open_pipe(rsi);
+        return handle_sys_open_pipe((char *)rsi);
         break;
       case PRINTPIPES:
         handle_sys_print_pipes();
@@ -150,6 +152,9 @@ uint64_t handleSyscall(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, u
       case GETCURRPID:
         return handle_sys_get_curr_pid();
         break;
+      case GETVISIBILITY:
+        return (int)handle_sys_get_visibility((int)rsi);
+        break;
 
 	}
 	return 0;
@@ -158,7 +163,7 @@ uint64_t handleSyscall(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, u
 //Handler para la system write
 void handle_sys_write(int fd, const char * buf, int length){
     if(fd == 1){print_N(buf, length);}
-    else{writeToPipe(fd-2, buf);}
+    else{writeToPipe(fd-2, (char *)buf);}
 }
 
 //Handler para la system get ticks
@@ -283,4 +288,8 @@ int handle_sys_get_fd(int pid, int fdPos){
 
 int handle_sys_get_curr_pid(){
   return getCurrentPid();
+}
+
+int handle_sys_get_visibility(int pid){
+  return getVisibility(pid);
 }
