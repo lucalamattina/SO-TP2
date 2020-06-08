@@ -9,7 +9,7 @@
 #define FOREGROUND 1
 #define BACKGROUND 0
 
-uint64_t * forks[MAX_PHYLO_COUNT];
+int * forks[MAX_PHYLO_COUNT];
 int philos[MAX_PHYLO_COUNT];
 int states[MAX_PHYLO_COUNT];
 
@@ -23,15 +23,15 @@ void initPhilos(){
         philos[i]=-1;
         states[i]=-1;
     }
-    uint64_t * fork1 = sys_sem_open("fork1");
-    uint64_t * fork2 = sys_sem_open("fork2");
-    uint64_t * fork3 = sys_sem_open("fork3");
-    uint64_t * fork4 = sys_sem_open("fork4");
+    int * fork1 = sys_sem_open("fork1");
+    int * fork2 = sys_sem_open("fork2");
+    int * fork3 = sys_sem_open("fork3");
+    int * fork4 = sys_sem_open("fork4");
 
-    uint64_t  philo1 = sys_new_process("philo1", 0, NULL, 10, FOREGROUND, philo);
-    uint64_t  philo2 = sys_new_process("philo2", 0, NULL, 10, FOREGROUND, philo);
-    uint64_t  philo3 = sys_new_process("philo3", 0, NULL, 10, FOREGROUND, philo);
-    uint64_t  philo4 = sys_new_process("philo4", 0, NULL, 10, FOREGROUND, philo);
+    int  philo1 = sys_new_process("philo1", 0, NULL, 10, FOREGROUND, philo);
+    int  philo2 = sys_new_process("philo2", 0, NULL, 10, FOREGROUND, philo);
+    int  philo3 = sys_new_process("philo3", 0, NULL, 10, FOREGROUND, philo);
+    int  philo4 = sys_new_process("philo4", 0, NULL, 10, FOREGROUND, philo);
 
     currPhilCount = 4;
 
@@ -65,13 +65,13 @@ int addPhilo(){
     char vec[2];
     itoa(aux, vec ,10);
     concat(phil+5, vec);
-    uint64_t newphilo = sys_new_process(phil, 0, NULL, 10, FOREGROUND, philo);
+    int newphilo = sys_new_process(phil, 0, NULL, 10, FOREGROUND, philo);
     philos[i] = newphilo;
     states[i] = 0;
     char * fork = "fork";
     itoa(aux, vec ,10);
     concat(fork+4, vec);
-    uint64_t * newfork = sys_sem_open(fork);
+    int * newfork = sys_sem_open(fork);
     forks[i] = newfork;
     currPhilCount++;
     sys_sem_post(semPhilo);
@@ -115,7 +115,7 @@ int left(int pos){
   return pos+1;
 }
 
-void check(int pos){
+void getForks(int pos){
   if (states[pos] == HUNGRY && states[left(pos)] != EATING && states[right(pos)] != EATING){
     sys_sem_wait(forks[center(pos)]);
     sys_sem_wait(forks[right(pos)]);
@@ -123,20 +123,20 @@ void check(int pos){
    }
 }
 
-void takeForks(int pos){
+void eat(int pos){
     sys_sem_wait(semPhilo);
-    check(pos);
+    getForks(pos);
     printBoard();
     sys_sem_post(semPhilo);
 }
 
-void placeForks(int pos){
+void finishEating(int pos){
   sys_sem_wait(semPhilo);
   states[pos] = FULL;
   sys_sem_post(forks[center(pos)]);
   sys_sem_post(forks[right(pos)]);
-  check(left(pos));
-  check(right(pos));
+  getForks(left(pos));
+  getForks(right(pos));
   printBoard();
   if(states[left(pos)]==EATING){
     states[left(pos)]=FULL;
@@ -156,8 +156,8 @@ void philo(){
     for(i=0; philos[i]!=pid;i++){}
     pos=i;
     while(states[pos]==HUNGRY){
-        takeForks(pos);
-        placeForks(pos);
+        eat(pos);
+        finishEating(pos);
     }
     }
      sys_sem_post(semPhilo);
@@ -213,7 +213,8 @@ void printBoard(){
 
 void philosophers(){
     initPhilos();
-    uint64_t * semPhilo = sys_sem_open("game");
+    print("Welcome to the philosophers problem\nPress A to add a new philosophers, R to remove a philosopher and X to return to Menu\n");
+    int * semPhilo = sys_sem_open("game");
     while(start){
         while(hungry() && start){
            char key = getKey();
@@ -236,7 +237,7 @@ void philosophers(){
           print("A philosopher has been removed\n");
         }
       break;
-      case 'q':
+      case 'x':
         print("\nChange the world, my final message. Goodbye\n\n");
         print("Program Finished!\n");
         for(int x = 0; x<currPhilCount;x++){
