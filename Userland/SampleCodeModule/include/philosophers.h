@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-#include <shell.h>
->>>>>>> 6f9112db3554f64ea7fdaefe96095d2b6a7eab8b
 #include "test_util.h"
 #include <syscalls.h>
 

@@ -56,10 +56,7 @@ void ps();
 void block(int pid);
 void kill(int pid);
 void nice(int pid, int priority);
-<<<<<<< HEAD
 void setFd(int pid, int fdToModify, int newFd);
 int getFd(int pid, int fdPos);
 
-=======
->>>>>>> 6f9112db3554f64ea7fdaefe96095d2b6a7eab8b
 #endif

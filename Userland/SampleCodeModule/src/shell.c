@@ -28,7 +28,6 @@
 #define TESTSYNC 16
 #define TESTNOSYNC 17
 #define PRINTSEM 18
-<<<<<<< HEAD
 #define PRINTPIPES 19
 #define KILL 20
 #define NICE 21
@@ -40,12 +39,6 @@
 #define PHILOSOPHERS 27
 #define PIPE 28
 
-=======
-#define PHILOSOPHERS 19
-#define KILL 20
-#define NICE 21
-#define BLOCK 22
->>>>>>> 6f9112db3554f64ea7fdaefe96095d2b6a7eab8b
 
 #define FOREGROUND 1
 #define BACKGROUND 0
@@ -59,11 +52,7 @@ typedef struct MM_rq{
 }mm_rq;
 
 //Todos los comandos disponibles
-<<<<<<< HEAD
 const char *commands[] = {"help", "shutdown", "invalid", "time", "beep", "sleep", "date", "clear", "div", "credits", "starwars", "mario", "testmm", "testproc", "ps", "mem", "testsync", "testnosync","pipes", "sem", "kill", "nice", "block"};
-=======
-const char *commands[] = {"help", "shutdown", "invalid", "time", "beep", "sleep", "date", "clear", "div", "credits", "starwars", "mario", "testmm", "testproc", "ps", "mem", "testsync", "testnosync", "sem","philosophers", "kill", "nice", "block"};
->>>>>>> 6f9112db3554f64ea7fdaefe96095d2b6a7eab8b
 const int commandCount = 20;
 int pid;
 int priority;
@@ -717,11 +706,8 @@ void handle_command(int cmd)
 	  test_sync();
 	  break;
   case TESTNOSYNC:
-	test_no_sync();
-	break;
-  case PHILOSOPHERS:
-    philosophers();
-	  break;
+  	test_no_sync();
+  	break;
   case PRINTSEM:
     printsem();
     break;
@@ -807,16 +793,12 @@ void display_help(void)
   print("sem - Prints semaphores\n");
   print("testsync - Tests semaphore sync\n");
   print("testnosync - Tests semaphora no sync\n");
-<<<<<<< HEAD
   print("pipes - Prints pipes and their states\n");
   print("cat - Prints stdin\n");
   print("loop - Prints it's own pid with a message\n");
   print("wc - Counts new lines in stdin\n");
   print("filter - Filters stdin vocals\n");
   print("philos - Run philosophers game\n");
-=======
-  print("philosophers - plays philosophers problem\n");
->>>>>>> 6f9112db3554f64ea7fdaefe96095d2b6a7eab8b
   print("kill - Kill a process given it's pid\n");
   print("nice - Changes a process' priority given it's pid and new priority\n");
   print("block - Blocks a process given it's pid\n");

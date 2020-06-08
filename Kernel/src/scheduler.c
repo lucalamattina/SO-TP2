@@ -54,13 +54,7 @@ void wrapper(int (*entryPoint)(int, char**), int argc, char **argv){
   _interrupt();
 }
 
-<<<<<<< HEAD
 
 int getCurrentPid(){
   return current->process->pid;
 }
-=======
-int getCurrentPid(){
-  return current->process->pid;
-}
->>>>>>> 6f9112db3554f64ea7fdaefe96095d2b6a7eab8b
