@@ -17,7 +17,7 @@ char getChar(){
 }
 
 void putChar(char c){
-	sys_write(0, &c, 1);
+	sys_write(1, &c, 1);
 }
 
 int scanf(const char * fmt, ...){
@@ -154,7 +154,7 @@ void printf(char * str, ...){
 
 		newStr[len] = 0;
 		len++;
-		sys_write(0, newStr, len);
+		sys_write(1, newStr, len);
 }
 
 /* ------------------------------- */
@@ -248,6 +248,10 @@ int isNumeric(char c){
 	return '0' <= c && c <= '9';
 }
 
+int isAlpha(char c){
+	return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z');
+}
+
 char getKey(void){
 	char buff;
 	sys_get_key(0, &buff);
@@ -324,7 +328,7 @@ void goToSleep(int ticks){
 }
 
 void writeKey(char * key){
-	sys_write_key(0, key);
+	sys_write_key(1, key);
 }
 
 int strcmp(const char * stra, const char * strb){
@@ -388,6 +392,7 @@ void printN(const char * str, int length){
 void clearScreen(){
 	sys_clear_console();
 }
+
 
 void * malloc(size_t size){
 	return sys_malloc(size);

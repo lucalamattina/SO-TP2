@@ -28,9 +28,17 @@
 #define TESTSYNC 16
 #define TESTNOSYNC 17
 #define PRINTSEM 18
-#define KILL 19
-#define NICE 20
-#define BLOCK 21
+#define PRINTPIPES 19
+#define KILL 20
+#define NICE 21
+#define BLOCK 22
+#define WC 23
+#define CAT 24
+#define FILTER 25
+#define LOOP 26
+#define PHILOSOPHERS 27
+#define PIPE 28
+
 
 #define FOREGROUND 1
 #define BACKGROUND 0
@@ -44,10 +52,19 @@ typedef struct MM_rq{
 }mm_rq;
 
 //Todos los comandos disponibles
-const char *commands[] = {"help", "shutdown", "invalid", "time", "beep", "sleep", "date", "clear", "div", "credits", "starwars", "mario", "testmm", "testproc", "ps", "mem", "testsync", "testnosync", "sem", "kill", "nice", "block"};
-const int commandCount = 19;
+const char *commands[] = {"help", "shutdown", "invalid", "time", "beep", "sleep", "date", "clear", "div", "credits", "starwars", "mario", "testmm", "testproc", "ps", "mem", "testsync", "testnosync","pipes", "sem", "kill", "nice", "block"};
+const int commandCount = 20;
 int pid;
 int priority;
+int isBackground = 0;
+int pipeCount = 0;
+int pipeFd;
+int fdR1 = 0;
+int fdW1 = 1;
+int fdR2 = 0;
+int fdW2 = 1;
+char firstcmd[10] = {0};
+char secondcmd[10] = {0};
 
 int getCommand(char *cmd);
 void generate_invalid_opc(void);
@@ -120,6 +137,7 @@ void my_process_dec(){
 }
 
 void test_sync(){
+
   uint64_t i;
 
   global = 0;
@@ -130,7 +148,6 @@ void test_sync(){
     my_create_process("my_process_inc", (uint64_t)my_process_inc);
     my_create_process("my_process_dec", (uint64_t)my_process_dec);
   }
-
 
   // The last one should print 0
 }
@@ -208,26 +225,81 @@ void test_mm(){
 }
 
 void p1(){
-  sys_write();
+  printf("p1 fd: %d\n", sys_get_fd(sys_get_curr_pid(), 1));
+  sys_write(sys_get_fd(sys_get_curr_pid(), 1), "aloja viejita", 0);
+  sys_print_pipes();
 
 }
 
 void p2(){
-  	while(1){
-      print("2\n");
-    }
+  char bufeta[20];
+  printf("p2 fd: %d\n", sys_get_fd(sys_get_curr_pid(), 0));
+  sys_read(sys_get_fd(sys_get_curr_pid(),0), bufeta,0);
+  printf("%s\n", bufeta);
 }
 
 void test_proc(){
+  // printf("current pid: %d\n", sys_get_curr_pid());
   int fd = sys_open_pipe("holis");
+  // printf("pipe fd: %d\n", fd);
   int pid1 = sys_new_process("p1", 0, NULL, 1, FOREGROUND, p1);
   sys_set_fd(pid1, 1, fd);
+  // printf("p1 fd: %d\n", sys_get_fd(pid1, 1));
   int pid2 = sys_new_process("p2", 0, NULL, 1, FOREGROUND, p2);
   sys_set_fd(pid2, 0, fd);
-
+  // printf("p2 fd: %d\n", sys_get_fd(pid2, 0));
 
 
 }
+
+void cat(){
+  char buffer[1024] = {0};
+  sys_read(sys_get_fd(sys_get_curr_pid(), 0), buffer, 1024);
+  sys_write(sys_get_fd(sys_get_curr_pid(), 1), buffer, strlen(buffer));
+}
+
+void wc(){
+  char buffer[1024] = {0};
+  int spaces = 0;
+  sys_read(sys_get_fd(sys_get_curr_pid(), 0), buffer, 1024);
+  for (size_t i = 0; i < strlen(buffer) && buffer[i] != 0; i++) {
+    if(buffer[i] == '\n'){
+      spaces++;
+    }
+  }
+  char lines[5] = {0};
+  itoa(spaces, lines, 10);
+  sys_write(sys_get_fd(sys_get_curr_pid(), 1), lines, strlen(lines));
+}
+
+void filter(){
+  char buffer[1024] = {0};
+  char auxBuff[1024] = {0};
+  sys_read(sys_get_fd(sys_get_curr_pid(), 0), buffer, 1024);
+  int j = 0;
+  for (size_t i = 0; i < strlen(buffer) && buffer[i] != 0; i++) {
+    if(buffer[i] != 'a' && buffer[i] != 'A' && buffer[i] != 'e' && buffer[i] != 'E' && buffer[i] != 'i' && buffer[i] != 'I' && buffer[i] != 'o' && buffer[i] != 'O' && buffer[i] != 'u' && buffer[i] != 'U'){
+      auxBuff[j++] = buffer[i];
+    }
+  }
+  sys_write(sys_get_fd(sys_get_curr_pid(), 1), auxBuff, strlen(auxBuff));
+}
+
+void loop(){
+  char salute[] = "Hello my friend, if you want me to stop spamming your shell feel free to kill me. By the way my PID is: ";
+  char pidd[4] = {0};
+  int pidAux = sys_get_curr_pid();
+  itoa(pidAux, pidd, 10);
+  int i = 0;
+  while(pidd[i] != 0){i++;}
+  pidd[i] = '\n';
+  concat(salute + strlen(salute), pidd);
+  while(1){
+    sys_write(sys_get_fd(sys_get_curr_pid(), 1), salute, strlen(salute));
+    sleep();
+  }
+}
+
 
 void ps(){
   sys_ps();
@@ -252,6 +324,55 @@ void block(int blockpid){
 void nice(int nicepid, int nicepriority){
   sys_nice(nicepid, nicepriority);
 }
+
+void pipe(){
+
+  int pidfirst;
+  int pidsecond;
+  if(!strcmp(firstcmd, "loop")){
+    pidfirst = sys_new_process(firstcmd, 0, NULL, 10, FOREGROUND, (uint64_t)loop);
+    sys_set_fd(pidfirst, 1, pipeFd);
+  }
+  if(!strcmp(firstcmd, "philos")){
+    pidfirst = sys_new_process(firstcmd, 0, NULL, 10, FOREGROUND, (uint64_t)philosophers);
+    sys_set_fd(pidfirst, 1, pipeFd);
+  }
+  if(!strcmp(firstcmd, "cat")){
+    pidfirst = sys_new_process(firstcmd, 0, NULL, 10, FOREGROUND, (uint64_t)cat);
+    sys_set_fd(pidfirst, 1, pipeFd);
+  }
+  if(!strcmp(firstcmd, "wc")){
+    pidfirst = sys_new_process(firstcmd, 0, NULL, 10, FOREGROUND, (uint64_t)wc);
+    sys_set_fd(pidfirst, 1, pipeFd);
+  }
+  if(!strcmp(firstcmd, "filter")){
+    pidfirst = sys_new_process(firstcmd, 0, NULL, 10, FOREGROUND, (uint64_t)filter);
+    sys_set_fd(pidfirst, 1, pipeFd);
+  }
+
+  if(!strcmp(secondcmd, "loop")){
+    pidsecond = sys_new_process(secondcmd, 0, NULL, 10, FOREGROUND, (uint64_t)loop);
+    sys_set_fd(pidsecond, 0, pipeFd);
+  }
+  if(!strcmp(secondcmd, "philos")){
+    pidsecond = sys_new_process(secondcmd, 0, NULL, 10, FOREGROUND, (uint64_t)philosophers);
+    sys_set_fd(pidsecond, 0, pipeFd);
+  }
+  if(!strcmp(secondcmd, "cat")){
+    pidsecond = sys_new_process(secondcmd, 0, NULL, 10, FOREGROUND, (uint64_t)cat);
+    sys_set_fd(pidsecond, 0, pipeFd);
+  }
+  if(!strcmp(secondcmd, "wc")){
+    pidsecond = sys_new_process(secondcmd, 0, NULL, 10, FOREGROUND, (uint64_t)wc);
+    sys_set_fd(pidsecond, 0, pipeFd);
+  }
+  if(!strcmp(secondcmd, "filter")){
+    pidsecond = sys_new_process(secondcmd, 0, NULL, 10, FOREGROUND, (uint64_t)filter);
+    sys_set_fd(pidsecond, 0, pipeFd);
+  }
+}
+
+
 
 uint64_t *init_shell(void)
 {
@@ -296,10 +417,15 @@ uint64_t *init_shell(void)
 			commandBuff[commandBuffPos] = 0;
 			//Recupera el comando que fue elegido
 			command = getCommand(commandBuff);
+
+      // if(secondcmd[0] != 0){
+      //
+      // }
 			//Llama a la funcion que decide como actuar en frente del comando
 			handle_command(command);
 			//Hace un reset del buffer de comando volviendo a la posicion 0
 			commandBuffPos = 0;
+
 			//Vuelve a imprimir el usuario para que se vea bien
 			if (command != SHUTDOWN_COMMAND)
 				print("arquiOS@ITBA: ");
@@ -412,6 +538,107 @@ int getCommand(char *cmd)
     return NICE;
   }
 
+  // char *cmdAux = cmd;
+  // int count = 0;
+  int f = 0;
+  int s = 0;
+  int spaceflag = 0;
+  int pipeflag = 0;
+  fdR1 = 0;
+  fdW1 = 1;
+  fdR2 = 0;
+  fdW2 = 1;
+  for(int q = 0; q < 10; q++){
+    firstcmd[q] = 0;
+    secondcmd[q] = 0;
+  }
+  while(*cmd != 0){
+    if(!spaceflag && isAlpha(*cmd)){
+      firstcmd[f++] = *cmd;
+    }else if(spaceflag && pipeflag && isAlpha(*cmd)){
+      secondcmd[s++] = *cmd;
+    }
+
+    if(*cmd == ' ' && !spaceflag){
+      spaceflag = 1;
+    }
+
+    if(*cmd == '|' && spaceflag){
+      if(*(cmd+1) != ' '){
+        return result;
+      }
+      pipeflag = 1;
+    }
+
+    if(*cmd == '&' && !spaceflag && !pipeflag){
+      if(*(cmd-1) == ' ' || *(cmd+1) != 0){
+        return result;
+      }
+      if(!strcmp(firstcmd, "loop")){
+        isBackground = 1;
+        return LOOP;
+      }
+      if(!strcmp(firstcmd, "philos")){
+        isBackground = 1;
+        return PHILOSOPHERS;
+      }
+      if(!strcmp(firstcmd, "cat")){
+        isBackground = 1;
+        return CAT;
+      }
+      if(!strcmp(firstcmd, "wc")){
+        isBackground = 1;
+        return WC;
+      }
+      if(!strcmp(firstcmd, "filter")){
+        isBackground = 1;
+        return FILTER;
+      }
+      return result;
+    }
+
+
+    cmd++;
+  }
+
+
+  if(!strcmp(firstcmd, "cat") && !spaceflag && !pipeflag){
+    isBackground = 0;
+    return CAT;
+  }
+  if(!strcmp(firstcmd, "wc") && !spaceflag && !pipeflag){
+    isBackground = 0;
+    return WC;
+  }
+  if(!strcmp(firstcmd, "filter") && !spaceflag && !pipeflag){
+    isBackground = 0;
+    return FILTER;
+  }
+  if(!strcmp(firstcmd, "philos") && !spaceflag && !pipeflag){
+    isBackground = 0;
+    return PHILOSOPHERS;
+  }
+  if(!strcmp(firstcmd, "loop") && !spaceflag && !pipeflag){
+    isBackground = 0;
+    return LOOP;
+  }
+
+  if(pipeflag && spaceflag){
+    char pipeName[10];
+    strcpy(pipeName, "pipe");
+    char pipeIndex[4];
+    itoa(pipeCount, pipeIndex, 10);
+    concat(pipeName[4], pipeIndex);
+    pipeFd = sys_open_pipe(pipeName);
+    pipeCount++;
+    isBackground = 0;
+    fdW1 = pipeFd;
+    fdR1 = 0;
+    fdW2 = 1;
+    fdR2 = pipeFd;
+    return PIPE;
+  }
+
 	return result;
 }
 
@@ -493,7 +720,30 @@ void handle_command(int cmd)
   case BLOCK:
     block(pid);
     break;
+  case LOOP:
+    sys_new_process("loop", 0, NULL, 10, isBackground ? BACKGROUND : FOREGROUND, (uint64_t)loop);
+    break;
+  case CAT:
+    sys_new_process("cat", 0, NULL, 10, isBackground ? BACKGROUND : FOREGROUND, (uint64_t)cat);
+    break;
+  case WC:
+    sys_new_process("wc", 0, NULL, 10, isBackground ? BACKGROUND : FOREGROUND, (uint64_t)wc);
+    break;
+  case PHILOSOPHERS:
+    sys_new_process("philo", 0, NULL, 10, isBackground ? BACKGROUND : FOREGROUND, (uint64_t)philosophers);
+    break;
+  case FILTER:
+    sys_new_process("filter", 0, NULL, 10, isBackground ? BACKGROUND : FOREGROUND, (uint64_t)filter);
+    break;
+  case PIPE:
+    pipe();
+    break;
+  case PRINTPIPES:
+    sys_print_pipes();
+    break;
 	}
+
+
 	print("\n");
 }
 
@@ -543,6 +793,12 @@ void display_help(void)
   print("sem - Prints semaphores\n");
   print("testsync - Tests semaphore sync\n");
   print("testnosync - Tests semaphora no sync\n");
+  print("pipes - Prints pipes and their states\n");
+  print("cat - Prints stdin\n");
+  print("loop - Prints it's own pid with a message\n");
+  print("wc - Counts new lines in stdin\n");
+  print("filter - Filters stdin vocals\n");
+  print("philos - Run philosophers game\n");
   print("kill - Kill a process given it's pid\n");
   print("nice - Changes a process' priority given it's pid and new priority\n");
   print("block - Blocks a process given it's pid\n");

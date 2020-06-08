@@ -56,5 +56,7 @@ void ps();
 void block(int pid);
 void kill(int pid);
 void nice(int pid, int priority);
+void setFd(int pid, int fdToModify, int newFd);
+int getFd(int pid, int fdPos);
 
 #endif

@@ -77,7 +77,10 @@ process * getProcess(int pid){
   while(aux!=NULL && aux->process->pid != pid){
     aux = aux->next;
   }
-	return aux->process;
+	if(aux != NULL){
+		return aux->process;
+	}
+	return NULL;
 }
 
 void setState(int pid, processState state){
@@ -166,22 +169,16 @@ void nice(int pid, int priority){
 }
 
 void setFd(int pid, int fdToModify, int newFd){
-	processNode * aux = pList->first;
-	while(aux != NULL && pid != aux->process->pid){
-		aux = aux->next;
-	}
-	if (aux != NULL && pid == aux->process->pid) {
-		aux->process->fd[fdToModify] = newFd;
+	process * aux = getProcess(pid);
+	if (aux != NULL) {
+		aux->fileDescriptors[fdToModify] = newFd;
 	}
 }
 
 int getFd(int pid, int fdPos){
-	processNode * aux = pList->first;
-	while(aux != NULL && pid != aux->process->pid){
-		aux = aux->next;
-	}
-	if (aux != NULL && pid == aux->process->pid) {
-		return aux->process->fd[fdPos];
+	process * aux = getProcess(pid);
+	if (aux != NULL) {
+		return aux->fileDescriptors[fdPos];
 	}
 	return -1;
 }

@@ -36,7 +36,7 @@ void scheduler(uint64_t stackPointer){
       else{
          current = current->next;
       }
-    
+
   } while(current->process->state != READY);
   setState(current->process->pid, RUNNING);
   quantum = current->process->priority < 0 ? current->process->priority * (-1) : current->process->priority;
@@ -52,4 +52,9 @@ void wrapper(int (*entryPoint)(int, char**), int argc, char **argv){
   entryPoint(argc, argv);
   current->process->state = DEAD;
   _interrupt();
+}
+
+
+int getCurrentPid(){
+  return current->process->pid;
 }

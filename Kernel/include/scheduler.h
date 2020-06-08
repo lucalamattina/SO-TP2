@@ -12,7 +12,7 @@ void fakeStack(process * process);
 void initScheduler();
 void scheduler(uint64_t stackPointer);
 void wrapper(int (*entryPoint)(int, char**), int argc, char **argv);
-
+int getCurrentPid();
 
 
 #endif

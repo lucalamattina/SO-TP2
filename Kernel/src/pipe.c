@@ -79,13 +79,14 @@ void printPipes(){
   print("---------------------------\n");
   for (size_t i = 0; i < MAX_PIPES; i++) {
     if(pipeList[i] != NULL){
-      print("Pipe name: %s", pipeList[i]->name);
-      print("Pipe in use: %s", pipeList[i]->usingPipe ? "yes" : "no");
-      print("Pipe's buffer: %s", pipeList[i]->buffer);
-      print("PID of process waiting to access pipe: %d", pipeList[i]->waitingPid);
-      print("Pipe fd: %d", pipeList[i]->fd);
+      print("Pipe name: %s \n", pipeList[i]->name);
+      print("Pipe in use: %s \n", pipeList[i]->usingPipe ? "yes" : "no");
+      print("Pipe's buffer: %s \n", pipeList[i]->buffer);
+      print("PID of process waiting to access pipe: %d \n", pipeList[i]->waitingPid);
+      print("Pipe fd: %d \n", pipeList[i]->fd);
+      print("---------------------------\n");
     }
-    print("---------------------------\n");
+
   }
 
 }
