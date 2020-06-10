@@ -21,40 +21,44 @@
 #define CREDITS_COMMAND 9
 #define STARWARS_COMMAND 10
 #define MARIO_COMMAND 11
-//#define TEST_MM 12
-//#define TESTPROC 13
-#define PS 12
-#define MEM 13
-//#define TESTSYNC 16
-//#define TESTNOSYNC 17
-#define PRINTSEM 14
-#define PRINTPIPES 15
-#define KILL 16
-#define NICE 17
-#define BLOCK 18
-#define WC 19
-#define CAT 20
-#define FILTER 21
-#define LOOP 22
-#define PHILOSOPHERS 23
-#define PIPE 24
-
+#define TEST_MM 12
+#define TESTPROC 13
+#define PS 14
+#define MEM 15
+#define TESTSYNC 16
+#define TESTNOSYNC 17
+#define PRINTSEM 18
+#define PRINTPIPES 19
+#define TESTPRIO 20
+#define KILL 21
+#define NICE 22
+#define BLOCK 23
+#define WC 24
+#define CAT 25
+#define FILTER 26
+#define LOOP 27
+#define PHILOSOPHERS 28
+#define PIPE 29
 
 #define FOREGROUND 1
 #define BACKGROUND 0
 
-// #define MAX_BLOCKS 128
-// #define MAX_MEMORY 1024 //Should be around 80% of memory managed by the MM
+#define MAX_PROCESSES 60 //Should be around 80% of the the processes handled by the kernel
 
-// typedef struct MM_rq{
-//   void * address;
-//   uint32_t size;
-// }mm_rq;
+#define MAX_BLOCKS 128
+#define MAX_MEMORY 60 * 1048576 //Should be around 80% of memory managed by the MM
+
+enum State {ERROR, RUNNING, BLOCKED, KILLED};
+
+typedef struct MM_rq{
+  void * address;
+  uint32_t size;
+}mm_rq;
 
 //Todos los comandos disponibles
-const char *commands[] = {"help", "shutdown", "invalid", "time", "beep", "sleep", "date", "clear", "div", "credits", "starwars", "mario", "ps", "mem", "pipes", "sem", "kill", "nice", "block"};
+const char *commands[] = {"help", "shutdown", "invalid", "time", "beep", "sleep", "date", "clear", "div", "credits", "starwars", "mario","testmm", "testproc", "ps", "mem", "testsync", "testnosync", "sem", "pipes", "testprio", "kill", "nice", "block"};
 
-const int commandCount = 16;
+const int commandCount = 21;
 int pid;
 int priority;
 int isBackground = 0;
@@ -77,192 +81,361 @@ void make_mario(void);
 int * sema;
 
 //----------------------------------------------------------------------------------------------------------------------------
-// uint64_t my_create_process(char * name, int(*entryPoint)(int,char**)){
-//   return sys_new_process(name, 0, NULL, 10, FOREGROUND, entryPoint);
-// }
-//
-//
-// uint64_t * my_sem_open(char *sem_id){
-//   return sys_sem_open(sem_id);
-// }
-//
-// void my_sem_wait(int * sem_id){
-//  sys_sem_wait(sem_id);
-// }
-//
-// void my_sem_post(int * sem_id){
-//   sys_sem_post(sem_id);
-// }
-//
-// void my_sem_close(int * sem_id){
-//   sys_sem_close(sem_id);
-// }
-//
-// #define N 1000
-// #define SEM_ID "semaforillo"
-// #define TOTAL_PAIR_PROCESSES 2
-//
-// uint64_t global;  //shared memory
 
-// void slowInc(uint64_t *p, uint64_t inc){
-//   uint64_t aux = *p;
-//   aux += inc;
-//   *p = aux;
-// }
-//
-// void my_process_inc(){
-//   uint64_t i;
-//   sema = my_sem_open(SEM_ID);
-//   for (i = 0; i < N; i++){
-//     my_sem_wait(sema);
-//     slowInc(&global, 1);
-//     my_sem_post(sema);
-//   }
-//
-//   my_sem_close(sema);
-//   printf("Final value: %d\n", global);
-//
-// }
-//
-// void my_process_dec(){
-//   uint64_t i;
-//   sema = my_sem_open(SEM_ID);
-//   for (i = 0; i < N; i++){
-//     my_sem_wait(sema);
-//     slowInc(&global, -1);
-//     my_sem_post(sema);
-//   }
-//   my_sem_close(sema);
-//   printf("Final value: %d\n", global);
-//
-// }
-//
-// void test_sync(){
-//
-//   uint64_t i;
-//
-//   global = 0;
-//
-//   printf("CREATING PROCESSES...\n");
-//   sema = my_sem_open(SEM_ID);
-//   for(i = 0; i < TOTAL_PAIR_PROCESSES; i++){
-//     my_create_process("my_process_inc", (uint64_t)my_process_inc);
-//     my_create_process("my_process_dec", (uint64_t)my_process_dec);
-//   }
-//
-//   // The last one should print 0
-// }
-//
-// void my_process_inc_no_sem(){
-//   uint64_t i;
-//   for (i = 0; i < N; i++){
-//     slowInc(&global, 1);
-//   }
-//
-//   printf("Final value: %d\n", global);
-// }
-//
-// void my_process_dec_no_sem(){
-//   uint64_t i;
-//   for (i = 0; i < N; i++){
-//     slowInc(&global, -1);
-//   }
-//
-//   printf("Final value: %d\n", global);
-// }
-//
-// void test_no_sync(){
-//   uint64_t i;
-//
-//   global = 0;
-//
-//   printf("CREATING PROCESSES...\n");
-//
-//   for(i = 0; i < TOTAL_PAIR_PROCESSES; i++){
-//     my_create_process("my_process_inc_no_sem", (uint64_t)my_process_inc_no_sem);
-//     my_create_process("my_process_dec_no_sem", (uint64_t)my_process_inc_no_sem);
-//   }
-//
-//   // The last one should not print 0
-// }
+void endless_loop(){
+  while(1);
+}
+
+uint64_t my_create_process(char * name, uint64_t entryPoint){
+  return sys_new_process(name, 0, NULL, 8, BACKGROUND, entryPoint);
+}
+
+int my_kill(uint32_t pid){
+  return kill(pid);
+}
+
+int my_block(uint32_t pid){
+  return block(pid);
+}
+
+int my_unblock(uint32_t pid){
+  return block(pid);
+}
+
+
+
+typedef struct P_rq{
+  uint32_t pid;
+  enum State state;
+}p_rq;
+
+void test_processes(){
+  p_rq p_rqs[MAX_PROCESSES];
+  uint8_t rq;
+  uint8_t alive = 0;
+  uint8_t action;
+
+  while (1){
+
+    // Create MAX_PROCESSES processes
+    for(rq = 0; rq < MAX_PROCESSES; rq++){
+      goToSleep(1); //lo agregamos porque al crearlos tan rapido no andaba bien
+      p_rqs[rq].pid = my_create_process("endless_loop", (uint64_t)endless_loop);  // TODO: Port this call as required
+
+      if (p_rqs[rq].pid == -1){                           // TODO: Port this as required
+        printf("Error creating process\n");               // TODO: Port this as required
+        return;
+      }else{
+        p_rqs[rq].state = RUNNING;
+        alive++;
+      }
+    }
+
+    // Randomly kills, blocks or unblocks processes until every one has been killed
+    while (alive > 0){
+
+      for(rq = 0; rq < MAX_PROCESSES; rq++){
+        action = GetUniform(2) % 2;
+
+        switch(action){
+          case 0:
+            if (p_rqs[rq].state == RUNNING || p_rqs[rq].state == BLOCKED){
+              if (my_kill(p_rqs[rq].pid) == -1){          // TODO: Port this as required
+                printf("Error killing process\n");        // TODO: Port this as required
+                return;
+              }
+              p_rqs[rq].state = KILLED;
+              alive--;
+            }
+            break;
+
+          case 1:
+            if (p_rqs[rq].state == RUNNING){
+              if(my_block(p_rqs[rq].pid) == -1){          // TODO: Port this as required
+                printf("Error blocking process\n");       // TODO: Port this as required
+                return;
+              }
+              p_rqs[rq].state = BLOCKED;
+            }
+            break;
+        }
+      }
+
+      // Randomly unblocks processes
+      for(rq = 0; rq < MAX_PROCESSES; rq++)
+        if (p_rqs[rq].state == BLOCKED && GetUniform(2) % 2){
+          if(my_unblock(p_rqs[rq].pid) == -1){            // TODO: Port this as required
+            printf("Error unblocking process\n");         // TODO: Port this as required
+            return;
+          }
+          p_rqs[rq].state = RUNNING;
+        }
+    }
+  }
+}
+//----------------------------------------------------------------------------------------------------------------------------
+
+#define MINOR_WAIT 1000000                               // TODO: To prevent a process from flooding the screen
+#define WAIT      10000000                              // TODO: Long enough to see theese processes beeing run at least twice
+
+uint64_t my_getpid(){
+  return sys_get_curr_pid();
+}
+
+
+uint64_t my_nice(uint64_t pid, uint64_t newPrio){
+  return nice(pid, newPrio);
+}
+
+
+void bussy_wait(uint64_t n){
+  uint64_t i;
+  for (i = 0; i < n; i++);
+}
+
+void endless_loop2(){
+  uint64_t pid = my_getpid();
+
+  while(1){
+    printf("%d ",pid);
+    bussy_wait(MINOR_WAIT);
+  }
+}
+
+#define TOTAL_PROCESSES 3
+
+void test_prio(){
+  uint64_t pids[TOTAL_PROCESSES];
+  uint64_t i;
+
+  for(i = 0; i < TOTAL_PROCESSES; i++)
+    pids[i] = my_create_process("endless_loop2", endless_loop2);
+
+  bussy_wait(WAIT);
+  printf("\nCHANGING PRIORITIES...\n");
+
+  for(i = 0; i < TOTAL_PROCESSES; i++){
+    switch (i % 3){
+      case 0:
+        my_nice(pids[i], 1); //lowest priority
+        break;
+      case 1:
+        my_nice(pids[i], 5); //medium priority
+        break;
+      case 2:
+        my_nice(pids[i], 10); //highest priority
+        break;
+    }
+  }
+
+  bussy_wait(WAIT);
+  printf("\nBLOCKING...\n");
+
+  for(i = 0; i < TOTAL_PROCESSES; i++)
+    my_block(pids[i]);
+
+  printf("CHANGING PRIORITIES WHILE BLOCKED...\n");
+  for(i = 0; i < TOTAL_PROCESSES; i++){
+    switch (i % 3){
+      case 0:
+        my_nice(pids[i], 5); //medium priority
+        break;
+      case 1:
+        my_nice(pids[i], 5); //medium priority
+        break;
+      case 2:
+        my_nice(pids[i], 5); //medium priority
+        break;
+    }
+  }
+
+  printf("UNBLOCKING...\n");
+
+  for(i = 0; i < TOTAL_PROCESSES; i++)
+    my_unblock(pids[i]);
+
+  bussy_wait(WAIT);
+  printf("\nKILLING...\n");
+
+  for(i = 0; i < TOTAL_PROCESSES; i++)
+    my_kill(pids[i]);
+}
+
+
+
+
 
 //----------------------------------------------------------------------------------------------------------------------------
 
-// void test_mm(){
-//   mm_rq mm_rqs[MAX_BLOCKS];
-//   uint8_t rq;
-//   uint32_t total;
-//
-// 	while(1){
-//     rq = 0;
-//     total = 0;
-//     //printminus();
-//     // Request as many blocks as we can
-//     while(rq < MAX_BLOCKS && total < MAX_MEMORY){
-//       mm_rqs[rq].size = GetUniform(MAX_MEMORY - total - 1) + 1;
-//       mm_rqs[rq].address = sys_malloc(mm_rqs[rq].size); // TODO: Port this call as required
-//
-//       total += mm_rqs[rq].size;
-//       rq++;
-//     }
-//
-//     // Set
-//     uint32_t i;
-//     for (i = 0; i < rq; i++)
-//       if (mm_rqs[i].address != NULL)
-//         memset(mm_rqs[i].address, i, mm_rqs[i].size); // TODO: Port this call as required
-//
-//     // Check
-//     for (i = 0; i < rq; i++)
-//       if (mm_rqs[i].address != NULL)
-//         if(!memcheck(mm_rqs[i].address, i, mm_rqs[i].size))
-//           printf("ERROR!\n"); // TODO: Port this call as required
-//
-//     // Free
-//     for (i = 0; i < rq; i++)
-//       if (mm_rqs[i].address != NULL)
-//         sys_free(mm_rqs[i].address);  // TODO: Port this call as required
-//   }
-// }
-//
-// void p1(){
-//   printf("p1 fd: %d\n", sys_get_fd(sys_get_curr_pid(), 1));
-//   sys_write(sys_get_fd(sys_get_curr_pid(), 1), "aloja viejita", 0);
-//   sys_print_pipes();
-//
-// }
 
-// void p2(){
-//   char bufeta[20];
-//   printf("p2 fd: %d\n", sys_get_fd(sys_get_curr_pid(), 0));
-//   sys_read(sys_get_fd(sys_get_curr_pid(),0), bufeta,0);
-//   printf("%s\n", bufeta);
-// }
-//
-// void test_proc(){
-//   // printf("current pid: %d\n", sys_get_curr_pid());
-//   int fd = sys_open_pipe("holis");
-//   // printf("pipe fd: %d\n", fd);
-//   int pid1 = sys_new_process("p1", 0, NULL, 1, FOREGROUND, p1);
-//   sys_set_fd(pid1, 1, fd);
-//   // printf("p1 fd: %d\n", sys_get_fd(pid1, 1));
-//   int pid2 = sys_new_process("p2", 0, NULL, 1, FOREGROUND, p2);
-//   sys_set_fd(pid2, 0, fd);
-//   // printf("p2 fd: %d\n", sys_get_fd(pid2, 0));
-//
-//
-// }
+
+uint64_t * my_sem_open(char *sem_id, int value){
+  return sys_sem_open(sem_id, value);
+}
+
+void my_sem_wait(int * sem_id){
+ sys_sem_wait(sem_id);
+}
+
+void my_sem_post(int * sem_id){
+  sys_sem_post(sem_id);
+}
+
+void my_sem_close(int * sem_id){
+  sys_sem_close(sem_id);
+}
+
+#define N 1000
+#define SEM_ID "semaforillo"
+#define TOTAL_PAIR_PROCESSES 2
+
+uint64_t global;  //shared memory
+
+void slowInc(uint64_t *p, uint64_t inc){
+  uint64_t aux = *p;
+  aux += inc;
+  *p = aux;
+}
+
+void my_process_inc(){
+  uint64_t i;
+  sema = my_sem_open(SEM_ID, 1);
+  for (i = 0; i < N; i++){
+    my_sem_wait(sema);
+    slowInc(&global, 1);
+    my_sem_post(sema);
+  }
+
+  my_sem_close(sema);
+  printf("Final value: %d\n", global);
+
+}
+
+void my_process_dec(){
+  uint64_t i;
+  sema = my_sem_open(SEM_ID, 1);
+  for (i = 0; i < N; i++){
+    my_sem_wait(sema);
+    slowInc(&global, -1);
+    my_sem_post(sema);
+  }
+  my_sem_close(sema);
+  printf("Final value: %d\n", global);
+
+}
+
+void test_sync(){
+
+  uint64_t i;
+
+  global = 0;
+
+  printf("CREATING PROCESSES...\n");
+  sema = my_sem_open(SEM_ID, 1);
+  for(i = 0; i < TOTAL_PAIR_PROCESSES; i++){
+    my_create_process("my_process_inc", (uint64_t)my_process_inc);
+    my_create_process("my_process_dec", (uint64_t)my_process_dec);
+  }
+
+  // The last one should print 0
+}
+
+void my_process_inc_no_sem(){
+  uint64_t i;
+  for (i = 0; i < N; i++){
+    slowInc(&global, 1);
+  }
+
+  printf("Final value: %d\n", global);
+}
+
+void my_process_dec_no_sem(){
+  uint64_t i;
+  for (i = 0; i < N; i++){
+    slowInc(&global, -1);
+  }
+
+  printf("Final value: %d\n", global);
+}
+
+void test_no_sync(){
+  uint64_t i;
+
+  global = 0;
+
+  printf("CREATING PROCESSES...\n");
+
+  for(i = 0; i < TOTAL_PAIR_PROCESSES; i++){
+    my_create_process("my_process_inc_no_sem", (uint64_t)my_process_inc_no_sem);
+    my_create_process("my_process_dec_no_sem", (uint64_t)my_process_inc_no_sem);
+  }
+
+  // The last one should not print 0
+}
+
+//----------------------------------------------------------------------------------------------------------------------------
+
+void test_mm(){
+  mm_rq mm_rqs[MAX_BLOCKS];
+  uint8_t rq;
+  uint32_t total;
+
+	while(1){
+    rq = 0;
+    total = 0;
+    //printminus();
+    // Request as many blocks as we can
+    while(rq < MAX_BLOCKS && total < MAX_MEMORY){
+      mm_rqs[rq].size = GetUniform(MAX_MEMORY - total - 1) + 1;
+      mm_rqs[rq].address = sys_malloc(mm_rqs[rq].size); // TODO: Port this call as required
+
+      total += mm_rqs[rq].size;
+      rq++;
+    }
+
+    // Set
+    uint32_t i;
+    for (i = 0; i < rq; i++)
+      if (mm_rqs[i].address != NULL)
+        memset(mm_rqs[i].address, i, mm_rqs[i].size); // TODO: Port this call as required
+
+    // Check
+    for (i = 0; i < rq; i++)
+      if (mm_rqs[i].address != NULL)
+        if(!memcheck(mm_rqs[i].address, i, mm_rqs[i].size))
+          printf("ERROR!\n"); // TODO: Port this call as required
+
+    // Free
+    for (i = 0; i < rq; i++)
+      if (mm_rqs[i].address != NULL)
+        sys_free(mm_rqs[i].address);  // TODO: Port this call as required
+  }
+}
+
+
 
 void cat(){
   char buffer[1024] = {0};
-  sys_read(sys_get_fd(sys_get_curr_pid(), 0), buffer, 1024);
+  int fd = sys_get_fd(sys_get_curr_pid(), 0);
+  if(fd == 0){
+    scanf("%s\n", buffer);
+    printf("\n");
+  }else {
+    sys_read(fd, buffer, 1024);
+  }
   sys_write(sys_get_fd(sys_get_curr_pid(), 1), buffer, strlen(buffer));
 }
 
 void wc(){
   char buffer[1024] = {0};
   int spaces = 0;
-  sys_read(sys_get_fd(sys_get_curr_pid(), 0), buffer, 1024);
+  int fd = sys_get_fd(sys_get_curr_pid(), 0);
+  if(fd == 0){
+    scanf("%s\n", buffer);
+    printf("\n");
+  }else {
+    sys_read(fd, buffer, 1024);
+  }
   for (size_t i = 0; i < strlen(buffer) && buffer[i] != 0; i++) {
     if(buffer[i] == '\n'){
       spaces++;
@@ -276,7 +449,13 @@ void wc(){
 void filter(){
   char buffer[1024] = {0};
   char auxBuff[1024] = {0};
-  sys_read(sys_get_fd(sys_get_curr_pid(), 0), buffer, 1024);
+  int fd = sys_get_fd(sys_get_curr_pid(), 0);
+  if(fd == 0){
+    scanf("%s\n", buffer);
+    printf("\n");
+  }else {
+    sys_read(fd, buffer, 1024);
+  }
   int j = 0;
   for (size_t i = 0; i < strlen(buffer) && buffer[i] != 0; i++) {
     if(buffer[i] != 'a' && buffer[i] != 'A' && buffer[i] != 'e' && buffer[i] != 'E' && buffer[i] != 'i' && buffer[i] != 'I' && buffer[i] != 'o' && buffer[i] != 'O' && buffer[i] != 'u' && buffer[i] != 'U'){
@@ -315,16 +494,16 @@ void printsem(){
   sys_print_sem();
 }
 
-void kill(int killpid){
-  sys_kill(killpid);
+int kill(int killpid){
+  return sys_kill(killpid);
 }
 
-void block(int blockpid){
-  sys_block(blockpid);
+int block(int blockpid){
+  return sys_block(blockpid);
 }
 
-void nice(int nicepid, int nicepriority){
-  sys_nice(nicepid, nicepriority);
+int nice(int nicepid, int nicepriority){
+  return sys_nice(nicepid, nicepriority);
 }
 
 void pipe(){
@@ -430,7 +609,7 @@ uint64_t *init_shell(void)
 
 			//Vuelve a imprimir el usuario para que se vea bien
 			if (command != SHUTDOWN_COMMAND)
-				print("arquiOS@ITBA: ");
+				print("\narquiOS@ITBA: ");
 		}
 		//CASO BACKSPACE - DELETE
 		else if (key == '\b')
@@ -698,8 +877,23 @@ void handle_command(int cmd)
   case MEM:
     mem();
     break;
+  case TEST_MM:
+    test_mm();
+    break;
+  case TESTSYNC:
+    test_sync();
+    break;
+  case TESTNOSYNC:
+    test_no_sync();
+    break;
+  case TESTPROC:
+    sys_new_process("testproc",0,NULL,10,FOREGROUND,(uint64_t)test_processes);
+    break;
   case PRINTSEM:
     printsem();
+    break;
+  case TESTPRIO:
+    test_prio();
     break;
   case KILL:
     kill(pid);
@@ -732,9 +926,7 @@ void handle_command(int cmd)
     sys_print_pipes();
     break;
 	}
-
-
-	print("\n");
+  printf("\n");
 }
 
 /*
@@ -776,13 +968,14 @@ void display_help(void)
 	print("credits - Displays info about the group\n");
 	print("starwars - Makes a cool Star Wars sound!\n");
 	print("mario - Makes a cool Mario sound!\n");
-	// print("testmm - Tests memory manager\n");
-  // print("testproc - Tests processes\n");
+	print("testmm - Tests memory manager\n");
+  print("testproc - Tests processes\n");
   print("ps - Prints basic information abouth each process\n");
   print("mem - Prints memory state\n");
   print("sem - Prints semaphores\n");
-  // print("testsync - Tests semaphore sync\n");
-  // print("testnosync - Tests semaphora no sync\n");
+  print("testsync - Tests semaphore sync\n");
+  print("testnosync - Tests semaphora no sync\n");
+  print("testnosync - Tests processes priority\n");
   print("pipes - Prints pipes and their states\n");
   print("cat - Prints stdin\n");
   print("loop - Prints it's own pid with a message\n");

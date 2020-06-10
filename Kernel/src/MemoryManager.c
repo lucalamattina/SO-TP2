@@ -57,7 +57,7 @@ void initializeFreeList(uint64_t * free_list_address){
   free_list->memoryAvailable = MEMORY_SIZE;
   free_list->usedMemory = 0;
   //creo una nueva pagina ubicada de forma contigua a la lista, y dejo lugar para todas las demas paginas, por eso apunto el data_address al "final" de toda la lista
-  createNewPage(free_list_address + sizeof(freeList), PAGE_SIZE, NULL, free_list_address + sizeof(freeList) + sizeof(page) * MAX_PAGE_QUANTITY);
+  createNewPage(free_list_address + sizeof(freeList), PAGE_SIZE, NULL, free_list_address + sizeof(freeList) + sizeof(page) * (MAX_PAGE_QUANTITY - 1));
   // page * newPage2 = createNewPage((uint64_t *)(free_list->tail + sizeof(page)), 4080, free_list->tail, (uint64_t *)(free_list->tail->data_address + free_list->tail->size));
   // page * newPage3 = createNewPage((uint64_t *)(free_list->tail + sizeof(page)), 4096, free_list->tail, (uint64_t *)(free_list->tail->data_address + free_list->tail->size));
   // print("----------initMM--------\n");

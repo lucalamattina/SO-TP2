@@ -40,8 +40,10 @@ void display_invalid_command(void);
 
 void ps();
 
-void nice(int nicepid, int nicepriority);
+int nice(int nicepid, int nicepriority);
 
-void block(int blockpid);
+int kill(int pid);
+
+int block(int blockpid);
 
 #endif

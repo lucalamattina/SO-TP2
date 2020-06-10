@@ -21,9 +21,9 @@
 #define FREE 13
 #define NEWPROC 14
 #define PSS 15
-#define KILL 16
-#define NICE 17
-#define BLOCK 18
+#define KILLS 16
+#define NICES 17
+#define BLOCKS 18
 #define MEMM 19
 #define SEMOPEN 20
 #define SEMPOST 21
@@ -67,15 +67,15 @@ int sys_new_process(char * name, int argc, char ** argv, int priority, int isFor
 
 void sys_ps();
 
-void sys_kill(int pid);
+int sys_kill(int pid);
 
-void sys_nice(int pid, int priority);
+int sys_nice(int pid, int priority);
 
-void sys_block(int pid);
+int sys_block(int pid);
 
 void sys_mem();
 
-int * sys_sem_open(char * name);
+int * sys_sem_open(char * name, int value);
 
 void sys_sem_post(int * sema);
 

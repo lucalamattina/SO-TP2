@@ -35,15 +35,15 @@ int handle_sys_new_process(char * name, int argc, char ** argv, int priority, in
 
 void handle_sys_ps(void);
 
-void handle_sys_kill(int pid);
+int handle_sys_kill(int pid);
 
-void handle_sys_block(int pid);
+int handle_sys_block(int pid);
 
-void handle_sys_nice(int pid, int priority);
+int handle_sys_nice(int pid, int priority);
 
 void handle_sys_mem(void);
 
-int * handle_sys_sem_open(char * name);
+int * handle_sys_sem_open(char * name, int value);
 
 void handle_sys_sem_post(int * sema);
 
@@ -111,19 +111,19 @@ uint64_t handleSyscall(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, u
         handle_sys_ps();
         break;
       case KILL:
-        handle_sys_kill(rsi);
+        return handle_sys_kill(rsi);
         break;
       case NICE:
-        handle_sys_nice(rsi, rdx);
+        return handle_sys_nice(rsi, rdx);
         break;
       case BLOCK:
-        handle_sys_block(rsi);
+        return handle_sys_block(rsi);
         break;
       case MEM:
         handle_sys_mem();
         break;
       case SEMOPEN:
-        return (uint64_t)handle_sys_sem_open((char *)rsi);
+        return (uint64_t)handle_sys_sem_open((char *)rsi, rdx);
         break;
       case SEMPOST:
         handle_sys_sem_post((int *)rsi);
@@ -234,24 +234,24 @@ void handle_sys_ps(void){
   ps();
 }
 
-void handle_sys_kill(int pid){
-  kill(pid);
+int handle_sys_kill(int pid){
+  return kill(pid);
 }
 
-void handle_sys_nice(int pid, int priority){
-  nice(pid, priority);
+int handle_sys_nice(int pid, int priority){
+  return nice(pid, priority);
 }
 
-void handle_sys_block(int pid){
-  block(pid);
+int handle_sys_block(int pid){
+  return block(pid);
 }
 
 void handle_sys_mem(){
   mem();
 }
 
-int * handle_sys_sem_open(char * name){
-  return semOpen(name);
+int * handle_sys_sem_open(char * name, int value){
+  return semOpen(name, value);
 }
 
 void handle_sys_sem_post(int * sema){

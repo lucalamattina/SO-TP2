@@ -24,10 +24,10 @@ void initPhilos(){
         philos[i]=-1;
         states[i]=-1;
     }
-    int * fork1 = sys_sem_open("fork1");
-    int * fork2 = sys_sem_open("fork2");
-    int * fork3 = sys_sem_open("fork3");
-    int * fork4 = sys_sem_open("fork4");
+    int * fork1 = sys_sem_open("fork1", 1);
+    int * fork2 = sys_sem_open("fork2", 1);
+    int * fork3 = sys_sem_open("fork3", 1);
+    int * fork4 = sys_sem_open("fork4", 1);
 
     int  philo1 = sys_new_process("philo1", 0, NULL, 10, background, (uint64_t)philo);
     int  philo2 = sys_new_process("philo2", 0, NULL, 10, background, (uint64_t)philo);
@@ -72,7 +72,7 @@ int addPhilo(){
     char * fork = "fork";
     itoa(aux, vec ,10);
     concat(fork+4, vec);
-    int * newfork = sys_sem_open(fork);
+    int * newfork = sys_sem_open(fork, 1);
     forks[i] = newfork;
     currPhilCount++;
     sys_sem_post(semPhilo);
@@ -216,7 +216,7 @@ void philosophers(){
     background = sys_get_visibility(sys_get_curr_pid());
     initPhilos();
     print("Welcome to the philosophers problem\nPress A to add a new philosophers, R to remove a philosopher and X to return to Menu\n");
-    int * semPhilo = sys_sem_open("game");
+    int * semPhilo = sys_sem_open("game", 1);
     while(start){
         while(hungry() && start){
            char key = getKey();

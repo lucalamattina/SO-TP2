@@ -72,24 +72,24 @@ void sys_ps(void){
 	_int80((uint64_t)PSS, 0, 0, 0, 0, 0);
 }
 
-void sys_kill(int pid){
-	_int80((uint64_t)KILL, (uint64_t)pid, 0, 0, 0, 0);
+int sys_kill(int pid){
+	return (int)_int80((uint64_t)KILLS, (uint64_t)pid, 0, 0, 0, 0);
 }
 
-void sys_nice(int pid, int priority){
-	_int80((uint64_t)NICE, (uint64_t)pid, (uint64_t)priority, 0, 0, 0);
+int sys_nice(int pid, int priority){
+	return (int)_int80((uint64_t)NICES, (uint64_t)pid, (uint64_t)priority, 0, 0, 0);
 }
 
-void sys_block(int pid){
-	_int80((uint64_t)BLOCK, (uint64_t)pid, 0, 0, 0, 0);
+int sys_block(int pid){
+	return (int)_int80((uint64_t)BLOCKS, (uint64_t)pid, 0, 0, 0, 0);
 }
 
 void sys_mem(){
 	_int80((uint64_t)MEMM, 0, 0, 0, 0, 0);
 }
 
-int * sys_sem_open(char * name){
-	return (int *)_int80((uint64_t)SEMOPEN, (uint64_t)name, 0, 0, 0, 0);
+int * sys_sem_open(char * name, int value){
+	return (int *)_int80((uint64_t)SEMOPEN, (uint64_t)name, (uint64_t)value, 0, 0, 0);
 }
 
 void sys_sem_post(int * sema){

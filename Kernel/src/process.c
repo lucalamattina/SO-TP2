@@ -125,26 +125,24 @@ void ps(){
 	}
 }
 
-void block(int pid){
-	if(pid == 0){
-		print("You can't block shell\n");
-		return;
-	}
+int block(int pid){
 	process * aux = getProcess(pid);
 	if(aux != NULL && aux->state != DEAD){
-			if(aux->state == BLOCKED){
-				aux->state = READY;
-			}
-			else if(aux->state != BLOCKED){
-				aux->state = BLOCKED;
-			}
+		if(aux->state == BLOCKED){
+			aux->state = READY;
+		}
+		else if(aux->state != BLOCKED){
+			aux->state = BLOCKED;
+		}
+		return pid;
 	}
+	return -1;
 }
 
-void kill(int pid){
+int kill(int pid){
 	if(pid == 0){
 		print("You can't kill shell\n");
-		return;
+		return 0;
 	}
 
 	processNode * aux = pList->first;
@@ -155,13 +153,14 @@ void kill(int pid){
 		setState(pid, DEAD);
 		//pList->pidCount--;
 		//freeNode(aux);
-		return;
+		return pid;
 	}
 	print("Invalid PID\n");
+	return -1;
 
 }
 
-void nice(int pid, int priority){
+int nice(int pid, int priority){
 	process * aux = getProcess(pid);
 	if(aux != NULL && aux->state != DEAD){
 		if(aux->priority < 0){
@@ -169,7 +168,9 @@ void nice(int pid, int priority){
 		} else{
 			aux->priority = priority;
 		}
+		return priority;
 	}
+	return -1;
 }
 
 void setFd(int pid, int fdToModify, int newFd){

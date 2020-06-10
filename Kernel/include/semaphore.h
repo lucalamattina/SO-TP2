@@ -23,7 +23,7 @@ void printsem();
 void initializeSemList();
 int getAvailableSemPos();
 int getAvailableProcessPos(sem* semaforo);
-int * semOpen(char* name);
+int * semOpen(char* name, int value);
 void semClose(int * semid);
 void semPost(int * semid);
 void semWait(int * semid);

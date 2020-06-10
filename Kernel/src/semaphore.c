@@ -31,14 +31,14 @@ int getAvailableProcessPos(sem* semaforo){
     return -1;
 }
 
-int * semOpen(char * name){
+int * semOpen(char * name, int value){
     int pos = getAvailableSemPos(name);
     if(pos == -1){
         return NULL;
     }
     semList[pos]=pmalloc(sizeof(sem));
     semList[pos]->name=name;
-    semList[pos]->state=1;
+    semList[pos]->state=value;
     semList[pos]->id = pos;
     for(int i=0; i<MAX_PROCESS_COUNT; i++){
         semList[pos]->processList[i] = -1;
